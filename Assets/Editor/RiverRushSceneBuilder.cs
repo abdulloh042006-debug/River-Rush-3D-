@@ -103,6 +103,8 @@ namespace RiverRush.Editor
             floaterBody.mass = 2f;
             floater.AddComponent<WaterFloatBody>();
 
+            world.AddComponent<RiverRaceBootstrap>();
+
             var cameraObject = new GameObject("River Follow Camera");
             cameraObject.tag = "MainCamera";
             var camera = cameraObject.AddComponent<Camera>();
