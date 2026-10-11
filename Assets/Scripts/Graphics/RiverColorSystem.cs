@@ -78,6 +78,11 @@ namespace RiverRush.Graphics
                 renderer.SetPropertyBlock(environmentProperties);
                 environmentProperties.Clear();
             }
+            // Branch materials match the main river's palette, never rainbow,
+            // even when a large multiplayer lobby colors all racers randomly.
+            foreach (var network in FindObjectsByType<RiverTributaryNetwork>(FindObjectsSortMode.None))
+                network.SetNaturalColors(deep, shallow);
+
             var sea = FindFirstObjectByType<OceanWaterPhysics>();
             if (sea != null)
             {
