@@ -4,11 +4,13 @@ using UnityEngine;
 namespace RiverRush.World
 {
     /// <summary>Seeded mountains with a continuous downhill channel (prototype terrain, not fluid simulation).</summary>
+    [DefaultExecutionOrder(-300)]
     [RequireComponent(typeof(MeshFilter), typeof(MeshRenderer))]
     public sealed class ProceduralTerrain : MonoBehaviour
     {
         [Header("World")]
         [SerializeField] private int seed = 12345;
+        [SerializeField] private bool randomizeEachRace = true;
         [SerializeField, Range(16, 256)] private int resolution = 96;
         [SerializeField, Min(1f)] private float worldSize = 500f;
         [SerializeField, Min(0f)] private float mountainHeight = 95f;
@@ -19,11 +21,18 @@ namespace RiverRush.World
         private Mesh generatedMesh;
 
         public int Seed => seed;
+        public bool RandomizeEachRace => randomizeEachRace;
         public float WorldSize => worldSize;
         public float RiverWidth => riverWidth;
         public float SeaLevel => seaLevel;
 
-        private void Awake() => Generate();
+        private void Awake()
+        {
+            if (Application.isPlaying && randomizeEachRace)
+                seed = unchecked((int)(System.DateTime.UtcNow.Ticks ^
+                                       System.Environment.TickCount));
+            Generate();
+        }
 
         private void NoiseOffsets(out float offsetX, out float offsetZ)
         {
