@@ -67,7 +67,30 @@ namespace RiverRush.Editor
             body.useGravity = false;
             player.AddComponent<RiverRunner>();
             player.AddComponent<RiverGrowth>();
-            player.AddComponent<RiverFinish>();
+            // The race manager owns the finish screen and standings.
+
+            // Five offline AI racers use the same flow model as the human.
+            float[] startingLanes = { -4.2f, -2.7f, 1.7f, 3.0f, 4.2f };
+            for (int i = 0; i < startingLanes.Length; i++)
+            {
+                var bot = GameObject.CreatePrimitive(PrimitiveType.Sphere);
+                bot.name = "River Bot " + (i + 1);
+                bot.transform.localScale = Vector3.one * 1.5f;
+                if (route.SampleBank(0f, startingLanes[i], out Vector3 botPosition))
+                    bot.transform.position = botPosition;
+                var visual = bot.GetComponent<MeshRenderer>();
+                Color botColor = Color.HSVToRGB((0.10f + i * 0.14f) % 1f, 0.68f, 0.95f);
+                visual.sharedMaterial = EnsureMaterial(
+                    "Assets/Materials/Bot_" + (i + 1) + ".mat",
+                    "Universal Render Pipeline/Lit", botColor);
+                var botBody = bot.AddComponent<Rigidbody>();
+                botBody.isKinematic = true;
+                botBody.useGravity = false;
+                var botRunner = bot.AddComponent<RiverRunner>();
+                botRunner.ConfigureBot(-0.35f + i * 0.32f, startingLanes[i]);
+                var ai = bot.AddComponent<RiverBotAI>();
+                ai.Configure(i + 1, terrain.Seed);
+            }
 
             // Cheap persistent streak replaces GPU-heavy particle emitters on mobile.
             var trail = player.AddComponent<TrailRenderer>();
@@ -119,13 +142,22 @@ namespace RiverRush.Editor
             sun.type = LightType.Directional;
             sun.intensity = 1.35f;
 
+            var race = new GameObject("Race Session & Leaderboard");
+            race.AddComponent<RiverRaceManager>();
+
             var settings = new GameObject("Performance & FPS");
             settings.AddComponent<AdaptiveQualityController>();
 
             if (!AssetDatabase.IsValidFolder("Assets/Scenes"))
                 AssetDatabase.CreateFolder("Assets", "Scenes");
-            EditorSceneManager.SaveScene(UnityEngine.SceneManagement.SceneManager.GetActiveScene(),
-                "Assets/Scenes/RiverRushPrototype.unity");
+            const string scenePath = "Assets/Scenes/RiverRushPrototype.unity";
+            EditorSceneManager.SaveScene(UnityEngine.SceneManagement.SceneManager.GetActiveScene(), scenePath);
+            var scenes = new System.Collections.Generic.List<EditorBuildSettingsScene>(EditorBuildSettings.scenes);
+            if (!scenes.Exists(s => s.path == scenePath))
+            {
+                scenes.Add(new EditorBuildSettingsScene(scenePath, true));
+                EditorBuildSettings.scenes = scenes.ToArray();
+            }
             AssetDatabase.SaveAssets();
             Debug.Log("Created river prototype with physics-based surface waves, floating crate, ocean and adaptive FPS.");
         }
