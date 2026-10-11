@@ -8,7 +8,7 @@ Source-code prototype of a 3D river-racing game. A seeded mountain world leads t
 
 - Fresh procedural terrain seed on each new race, with an Inspector toggle to replay a saved seed; mountains, valleys and a monotonic downhill main river.
 - **Five generated tributaries** carved into the same terrain mesh with branching 3D water ribbons and confluence pickups; branch floating bodies receive buoyancy and current drag.
-- **Procedural nature** with seeded low-poly conifers, broadleaf trees, rocks, alpine boulders and meadow shrubs, combined into four mesh batches (not hundreds of separate draw objects).
+- **Procedural nature** with seeded low-poly conifers, broadleaf trees, rocks, alpine boulders, meadow shrubs and freshwater riverbank reeds, combined into four mesh batches (not hundreds of separate draw objects).
 - **Terrain biomes** shaded by elevation and slope: sand, green forests, rocky hills and snowy mountain peaks.
 - World-space physical-distance spline/arc-length, samples and slopes.
 - Flow speed computed from grade, gravity-like acceleration, friction and shore slowdown; turning inertia, bank boundaries and eddies.
