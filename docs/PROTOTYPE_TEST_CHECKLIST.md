@@ -28,6 +28,18 @@
 - [ ] Locally, `python tools/source_audit.py` prints PASS.
 - [ ] Remember: this is not a C# compiler or Unity shader validation.
 
+## Natural audio and water colors
+- [ ] One human + five AI bots: racers have distinct blue/turquoise/cyan semi-transparent colors.
+- [ ] Repeating a seed reproduces the same water-color palette; a new seed varies hues naturally.
+- [ ] Inspector crowd preview >=8 human players enables randomized rainbow racer colors.
+- [ ] Toggle crowd preview off: normal blue palettes return; environment stays naturally blue throughout.
+- [ ] Confirm transparent droplet shader compiles in Unity 6 URP on Android and Windows.
+- [ ] Listen to separate water, wind, leaves/birds loops and check for clipping/seam clicks.
+- [ ] River rush grows louder with speed; forest ambience fades toward the sea.
+- [ ] Collect tributary: audible one-shot splash. Mute/volume controls and PlayerPrefs persistence work.
+- [ ] Test optional licensed recordings as overrides, without destroying imported audio clips.
+- [ ] Measure FPS and draw calls with 8, 32 and 100 racers. No benchmark claim until device runs.
+
 ## Performance / Android
 - [ ] Play on at least one weak and one strong phone; note Android versions and refresh rate.
 - [ ] Select 30 / 60 / 90 / 120 / Native and compare *actual* FPS counter against requested cap.
