@@ -29,6 +29,7 @@ namespace RiverRush.Editor
             var route = world.AddComponent<RiverRoute>();
             route.Rebuild();
             world.AddComponent<RiverFlowField>();
+            world.AddComponent<WaterWaveSimulator>();
 
             var river = new GameObject("Animated River Surface");
             river.AddComponent<MeshFilter>();
@@ -73,7 +74,7 @@ namespace RiverRush.Editor
             trail.minVertexDistance = 0.35f;
             trail.startWidth = 2f;
             trail.endWidth = 0.05f;
-            trail.material = EnsureMaterial("Assets/Materials/Wake.mat",
+            trail.sharedMaterial = EnsureMaterial("Assets/Materials/Wake.mat",
                 "Universal Render Pipeline/Unlit", new Color(0.57f, 0.95f, 0.99f));
             trail.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
             trail.receiveShadows = false;
@@ -123,7 +124,7 @@ namespace RiverRush.Editor
             EditorSceneManager.SaveScene(UnityEngine.SceneManagement.SceneManager.GetActiveScene(),
                 "Assets/Scenes/RiverRushPrototype.unity");
             AssetDatabase.SaveAssets();
-            Debug.Log("Created river prototype with flow physics, water animation, floating crate, ocean and adaptive FPS.");
+            Debug.Log("Created river prototype with physics-based surface waves, floating crate, ocean and adaptive FPS.");
         }
 
         private static Material EnsureMaterial(string path, string shaderName, Color color)
