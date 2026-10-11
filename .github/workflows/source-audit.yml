@@ -1,4 +1,4 @@
-name: Source Audit (No Unity License)
+name: Source and Procedural World Tests (No Unity License)
 
 on:
   push:
@@ -23,3 +23,9 @@ jobs:
           python-version: '3.12'
       - name: Verify Unity source structure
         run: python tools/source_audit.py
+      - name: .NET SDK for deterministic procedural river tests
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+      - name: Compile and stress-test real river branch C# mathematics
+        run: dotnet run --project tools/branch-smoke/BranchSmoke.csproj --configuration Release
