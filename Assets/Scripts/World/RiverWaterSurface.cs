@@ -15,6 +15,16 @@ namespace RiverRush.World
         [SerializeField] private Material waterMaterial;
         private Mesh generatedMesh;
         private Material runtimeMaterial;
+        private MaterialPropertyBlock waterProperties;
+
+        public void SetDetail(float detail)
+        {
+            if (waterProperties == null) waterProperties = new MaterialPropertyBlock();
+            var renderer = GetComponent<MeshRenderer>();
+            renderer.GetPropertyBlock(waterProperties);
+            waterProperties.SetFloat("_Detail", Mathf.Clamp01(detail));
+            renderer.SetPropertyBlock(waterProperties);
+        }
 
         private void Start() => Rebuild();
 
