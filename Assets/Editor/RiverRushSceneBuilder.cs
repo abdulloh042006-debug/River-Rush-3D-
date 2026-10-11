@@ -24,8 +24,14 @@ namespace RiverRush.Editor
             world.AddComponent<MeshCollider>();
             var terrain = world.AddComponent<ProceduralTerrain>();
             terrainRenderer.sharedMaterial = EnsureMaterial(
-                "Assets/Materials/Terrain.mat", "Universal Render Pipeline/Lit",
-                new Color(0.26f, 0.52f, 0.29f));
+                "Assets/Materials/Terrain.mat", "RiverRush/TerrainBiomeURP",
+                Color.white);
+            if (terrainRenderer.sharedMaterial != null)
+            {
+                terrainRenderer.sharedMaterial.SetFloat("_SeaLevel", terrain.SeaLevel);
+                terrainRenderer.sharedMaterial.SetFloat("_MountainHeight", 95f);
+                EditorUtility.SetDirty(terrainRenderer.sharedMaterial);
+            }
             terrain.Generate();
             var route = world.AddComponent<RiverRoute>();
             route.Rebuild();
