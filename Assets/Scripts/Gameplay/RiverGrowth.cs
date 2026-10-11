@@ -1,4 +1,5 @@
 using UnityEngine;
+using RiverRush.Audio;
 
 namespace RiverRush.Gameplay
 {
@@ -16,6 +17,7 @@ namespace RiverRush.Gameplay
 
         private float volume;
         private Vector3 initialScale;
+        private RiverNatureAudio ambience;
 
         public float Volume => volume;
         public float NormalizedVolume => Mathf.InverseLerp(startingVolume, maxVolume, volume);
@@ -24,6 +26,7 @@ namespace RiverRush.Gameplay
         {
             if (waterVisual == null) waterVisual = transform;
             initialScale = waterVisual.localScale;
+            ambience = FindFirstObjectByType<RiverNatureAudio>();
             volume = startingVolume;
             UpdateVisual();
         }
@@ -36,6 +39,9 @@ namespace RiverRush.Gameplay
             UpdateVisual();
             if (volume > previous)
             {
+                if (ambience == null) ambience = FindFirstObjectByType<RiverNatureAudio>();
+                if (ambience != null)
+                    ambience.PlaySplash(Mathf.Clamp((volume - previous) / 7f, 0.3f, 1.0f));
                 var waves = FindFirstObjectByType<RiverRush.World.WaterWaveSimulator>();
                 var runner = GetComponent<RiverRunner>();
                 if (waves != null && runner != null)
