@@ -18,13 +18,19 @@ namespace RiverRush.Editor
             var flow = Object.FindFirstObjectByType<RiverFlowField>();
             var water = Object.FindFirstObjectByType<RiverWaterSurface>();
             var quality = Object.FindFirstObjectByType<AdaptiveQualityController>();
-            var runner = Object.FindFirstObjectByType<RiverRunner>();
+            RiverRunner runner = null;
+            var allRunners = Object.FindObjectsByType<RiverRunner>(FindObjectsSortMode.None);
+            foreach (var candidate in allRunners)
+                if (candidate.IsHumanControlled) { runner = candidate; break; }
             var bootstrap = Object.FindFirstObjectByType<RiverRaceBootstrap>();
             var waves = Object.FindFirstObjectByType<WaterWaveSimulator>();
             var oceanPhysics = Object.FindFirstObjectByType<OceanWaterPhysics>();
+            var race = Object.FindFirstObjectByType<RiverRaceManager>();
+            var bots = Object.FindObjectsByType<RiverBotAI>(FindObjectsSortMode.None);
             int failures = 0;
             if (terrain == null || route == null || flow == null || water == null
-                || quality == null || runner == null || bootstrap == null || waves == null || oceanPhysics == null)
+                || quality == null || runner == null || bootstrap == null || waves == null ||
+                oceanPhysics == null || race == null || bots.Length < 3)
             {
                 Debug.LogError("Missing components. Use River Rush/Create Prototype Scene first.");
                 return;
@@ -91,7 +97,7 @@ namespace RiverRush.Editor
 
             // Pass 4: performance configuration and river physics component presence.
             if (Object.FindFirstObjectByType<WaterFloatBody>() == null ||
-                Object.FindFirstObjectByType<RiverFinish>() == null) failures++;
+                allRunners.Length != bots.Length + 1) failures++;
             if (quality.EffectiveQualityLevel < 0 || quality.EffectiveQualityLevel > 3)
                 failures++;
 
