@@ -1,6 +1,7 @@
 #if UNITY_EDITOR
 using RiverRush.Gameplay;
 using RiverRush.Graphics;
+using RiverRush.Audio;
 using RiverRush.World;
 using UnityEditor;
 using UnityEngine;
@@ -25,12 +26,15 @@ namespace RiverRush.Editor
             var bootstrap = Object.FindFirstObjectByType<RiverRaceBootstrap>();
             var waves = Object.FindFirstObjectByType<WaterWaveSimulator>();
             var oceanPhysics = Object.FindFirstObjectByType<OceanWaterPhysics>();
+            var waterColors = Object.FindFirstObjectByType<RiverColorSystem>();
+            var natureSound = Object.FindFirstObjectByType<RiverNatureAudio>();
             var race = Object.FindFirstObjectByType<RiverRaceManager>();
             var bots = Object.FindObjectsByType<RiverBotAI>(FindObjectsSortMode.None);
             int failures = 0;
             if (terrain == null || route == null || flow == null || water == null
                 || quality == null || runner == null || bootstrap == null || waves == null ||
-                oceanPhysics == null || race == null || bots.Length < 3)
+                oceanPhysics == null || race == null || bots.Length < 3 ||
+                waterColors == null || natureSound == null)
             {
                 Debug.LogError("Missing components. Use River Rush/Create Prototype Scene first.");
                 return;
@@ -99,6 +103,18 @@ namespace RiverRush.Editor
             if (Object.FindFirstObjectByType<WaterFloatBody>() == null ||
                 allRunners.Length != bots.Length + 1) failures++;
             if (quality.EffectiveQualityLevel < 0 || quality.EffectiveQualityLevel > 3)
+                failures++;
+
+            // Audio and palette configuration must be present even if the new
+            // laptop has no audio device connected at the time of validation.
+            if (waterColors.CrowdThreshold < 2 || waterColors.ConnectedHumanCount < 1)
+                failures++;
+            if (!waterColors.FullRandomColors && waterColors.ConnectedHumanCount == 1)
+                waterColors.RefreshPalette();
+            var dropletRenderer = runner.GetComponent<Renderer>();
+            if (dropletRenderer == null || dropletRenderer.sharedMaterial == null ||
+                dropletRenderer.sharedMaterial.shader == null ||
+                dropletRenderer.sharedMaterial.shader.name != "RiverRush/WaterDropletURP")
                 failures++;
 
             // Pass 5: correct playable entity physics and terrain collider.
