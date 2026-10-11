@@ -27,6 +27,7 @@ FILES = {
     "graphics": "Assets/Scripts/Graphics/AdaptiveQualityController.cs",
     "builder": "Assets/Editor/RiverRushSceneBuilder.cs",
     "validator": "Assets/Editor/RiverRushEditorValidator.cs",
+    "build_menu": "Assets/Editor/RiverRushBuildMenu.cs",
     "river_shader": "Assets/Shaders/StylizedRiverURP.shader",
     "ocean_shader": "Assets/Shaders/StylizedOceanURP.shader",
 }
@@ -110,6 +111,8 @@ def main() -> int:
         "scene includes race manager": ("builder", "AddComponent<RiverRaceManager>()"),
         "scene added to build": ("builder", "EditorBuildSettings.scenes"),
         "Unity editor validator": ("validator", "Validate()"),
+        "Windows x64 build menu": ("build_menu", "BuildTarget.StandaloneWindows64"),
+        "Android APK build menu": ("build_menu", "BuildTarget.Android"),
         "foam shader": ("river_shader", "_FoamWidth"),
         "ocean shader": ("ocean_shader", "_OceanColor"),
     }
