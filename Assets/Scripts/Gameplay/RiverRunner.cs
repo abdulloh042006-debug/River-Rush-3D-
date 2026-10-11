@@ -20,6 +20,8 @@ namespace RiverRush.Gameplay
         private float sidewaysSpeed;
         private float downstreamSpeed;
         private bool completed;
+        private WaterWaveSimulator waves;
+        private float nextWakeImpulse;
 
         public float Progress => meters;
         public float NormalizedProgress => route != null && route.TotalLength > 0f
@@ -31,6 +33,7 @@ namespace RiverRush.Gameplay
         {
             if (route == null) route = FindFirstObjectByType<RiverRoute>();
             if (flow == null) flow = FindFirstObjectByType<RiverFlowField>();
+            waves = FindFirstObjectByType<WaterWaveSimulator>();
             if (route != null && route.Points == null) route.Rebuild();
             if (route != null && route.SampleBank(0f, 0f, out Vector3 start))
                 transform.position = start;
@@ -71,6 +74,11 @@ namespace RiverRush.Gameplay
                         Quaternion.LookRotation(flat.normalized), turnRate * deltaTime);
             }
 
+            if (waves != null && Time.time >= nextWakeImpulse)
+            {
+                waves.AddImpulse(meters, Mathf.Min(2f, downstreamSpeed * 0.09f), 4.5f);
+                nextWakeImpulse = Time.time + 0.20f;
+            }
             if (meters >= route.TotalLength - 0.01f) completed = true;
         }
 
