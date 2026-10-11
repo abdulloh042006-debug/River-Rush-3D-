@@ -98,7 +98,7 @@ namespace RiverRush.Gameplay
             float h = Screen.height / scale;
 
             GUI.Box(new Rect(8, 48, 235, 73),
-                "TIME: " + RaceTime.ToString("F1") + "s  |  POSITION: " +
+                "TIME: " + (playerFinished ? finalTime : RaceTime).ToString("F1") + "s  |  POSITION: " +
                 (playerFinished ? finalRank : PlayerRank) + "/" + competitors.Count +
                 "\nDISTANCE: " + Mathf.RoundToInt(player.NormalizedProgress * 100f) + "%");
 
@@ -125,7 +125,7 @@ namespace RiverRush.Gameplay
             {
                 GUI.Box(new Rect(w * 0.5f - 160, h * 0.19f, 320, 130),
                     "OCEAN REACHED!\nPLACE: " + finalRank + "/" + competitors.Count +
-                    "\nTIME: " + RaceTime.ToString("F1") + "s");
+                    "\nTIME: " + finalTime.ToString("F1") + "s");
                 if (GUI.Button(new Rect(w * 0.5f - 100, h * 0.19f + 138, 200, 54),
                     "NEW RANDOM RACE"))
                 {
