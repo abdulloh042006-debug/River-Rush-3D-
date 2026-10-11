@@ -113,6 +113,7 @@ def main() -> int:
         "batched forest and rock groups": ("nature", "GeometryBuffer"),
         "procedural trees": ("nature", "AddCone("),
         "procedural boulders and shrubs": ("nature", "AddOctahedron("),
+        "procedural riverbank reeds": ("nature", "riverbankReedBudget"),
         "waterway exclusion for foliage": ("nature", "IsNearWaterway("),
         "nature terrain vertex colors": ("nature_shader", "input.color"),
         "snow rock grass sand terrain": ("terrain_shader", "_SnowColor"),
