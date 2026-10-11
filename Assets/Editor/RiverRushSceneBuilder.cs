@@ -1,6 +1,7 @@
 #if UNITY_EDITOR
 using RiverRush.Gameplay;
 using RiverRush.Graphics;
+using RiverRush.Audio;
 using RiverRush.World;
 using UnityEditor;
 using UnityEditor.SceneManagement;
@@ -59,7 +60,7 @@ namespace RiverRush.Editor
                 player.transform.position = route.transform.TransformPoint(route.Points[0]);
             var playerRenderer = player.GetComponent<MeshRenderer>();
             playerRenderer.sharedMaterial = EnsureMaterial(
-                "Assets/Materials/Player.mat", "Universal Render Pipeline/Lit",
+                "Assets/Materials/Player.mat", "RiverRush/WaterDropletURP",
                 new Color(0.045f, 0.78f, 0.94f));
 
             var body = player.AddComponent<Rigidbody>();
@@ -79,10 +80,10 @@ namespace RiverRush.Editor
                 if (route.SampleBank(0f, startingLanes[i], out Vector3 botPosition))
                     bot.transform.position = botPosition;
                 var visual = bot.GetComponent<MeshRenderer>();
-                Color botColor = Color.HSVToRGB((0.10f + i * 0.14f) % 1f, 0.68f, 0.95f);
+                Color botColor = Color.HSVToRGB(0.505f + i * 0.018f, 0.55f, 0.94f);
                 visual.sharedMaterial = EnsureMaterial(
                     "Assets/Materials/Bot_" + (i + 1) + ".mat",
-                    "Universal Render Pipeline/Lit", botColor);
+                    "RiverRush/WaterDropletURP", botColor);
                 var botBody = bot.AddComponent<Rigidbody>();
                 botBody.isKinematic = true;
                 botBody.useGravity = false;
@@ -145,6 +146,16 @@ namespace RiverRush.Editor
             var race = new GameObject("Race Session & Leaderboard");
             race.AddComponent<RiverRaceManager>();
 
+            // Natural cyan, glassy blue racer colors until >=8 real human participants.
+            // Offline bot count does not trigger rainbow mode.
+            var colorManager = new GameObject("Dynamic Water Colors");
+            colorManager.AddComponent<RiverColorSystem>();
+
+            // Generated, copyright-free ambient loops: water, mountain wind and birds/leaves.
+            // A single AudioListener is already attached to the camera.
+            var ambience = new GameObject("Ambient Water Wind Nature");
+            ambience.AddComponent<RiverNatureAudio>();
+
             var settings = new GameObject("Performance & FPS");
             settings.AddComponent<AdaptiveQualityController>();
 
@@ -159,7 +170,7 @@ namespace RiverRush.Editor
                 EditorBuildSettings.scenes = scenes.ToArray();
             }
             AssetDatabase.SaveAssets();
-            Debug.Log("Created river prototype with physics-based surface waves, floating crate, ocean and adaptive FPS.");
+            Debug.Log("Created river prototype with water physics, 5 bots, natural blue/translucent racer colors, procedural ambience and FPS settings.");
         }
 
         private static Material EnsureMaterial(string path, string shaderName, Color color)
@@ -178,6 +189,7 @@ namespace RiverRush.Editor
             if (material.HasProperty("_BaseColor")) material.SetColor("_BaseColor", color);
             if (material.HasProperty("_ShallowColor")) material.SetColor("_ShallowColor", color);
             if (material.HasProperty("_OceanColor")) material.SetColor("_OceanColor", color);
+            if (material.HasProperty("_BaseTint")) material.SetColor("_BaseTint", color);
             AssetDatabase.CreateAsset(material, path);
             return material;
         }
