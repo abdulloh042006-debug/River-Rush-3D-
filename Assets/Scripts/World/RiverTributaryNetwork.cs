@@ -143,6 +143,61 @@ namespace RiverRush.World
             GeneratedPickupCount++;
         }
 
+        /// <summary>
+        /// Physical surface/current sampling for floating objects in smaller
+        /// tributaries. The player's race route remains on the main channel.
+        /// </summary>
+        public bool TrySampleSurface(Vector3 position, out Vector3 surface, out Vector3 current)
+        {
+            surface = Vector3.zero;
+            current = Vector3.zero;
+            if (terrain == null || terrain.Branches == null) return false;
+            Vector3 local = transform.InverseTransformPoint(position);
+            Vector2 planar = new Vector2(local.x, local.z);
+            float bestSquared = float.PositiveInfinity;
+            RiverBranchLayout.Branch closest = null;
+            Vector2 closestPoint = Vector2.zero;
+            Vector2 tangent = Vector2.up;
+
+            foreach (var branch in terrain.Branches.Branches)
+            {
+                float limit = branch.Width * ribbonWidthRatio * 0.5f;
+                if (planar.y < branch.Points[0].y - limit ||
+                    planar.y > branch.Points[branch.Points.Length - 1].y + limit)
+                    continue;
+                for (int i = 1; i < branch.Points.Length; i++)
+                {
+                    Vector2 a = branch.Points[i - 1];
+                    Vector2 b = branch.Points[i];
+                    Vector2 ab = b - a;
+                    float denominator = ab.sqrMagnitude;
+                    if (denominator <= 0.0001f) continue;
+                    float t = Mathf.Clamp01(Vector2.Dot(planar - a, ab) / denominator);
+                    Vector2 nearest = a + ab * t;
+                    float d2 = (nearest - planar).sqrMagnitude;
+                    if (d2 >= bestSquared || d2 > limit * limit) continue;
+                    bestSquared = d2;
+                    closest = branch;
+                    closestPoint = nearest;
+                    tangent = ab.normalized;
+                }
+            }
+            if (closest == null) return false;
+            float waterHeight = terrain.SampleHeight(closestPoint.x, closestPoint.y) +
+                                waterClearance;
+            surface = transform.TransformPoint(new Vector3(planar.x, waterHeight, planar.y));
+            Vector3 fromDirection = new Vector3(tangent.x, 0f, tangent.y);
+            float v = Mathf.Clamp01(closestPoint.y / terrain.WorldSize + 0.5f);
+            // The channel bed steepness sets an approximate downhill drift.
+            float bedBefore = terrain.RiverBedAt(Mathf.Max(0f, v - 0.01f));
+            float bedAfter = terrain.RiverBedAt(Mathf.Min(1f, v + 0.01f));
+            float slope = Mathf.Clamp01((bedBefore - bedAfter) /
+                Mathf.Max(0.01f, terrain.WorldSize * 0.02f));
+            float speed = Mathf.Lerp(3f, 13f, slope * 7f);
+            current = transform.TransformDirection(fromDirection.normalized) * speed;
+            return true;
+        }
+
         public void SetDetail(float detail)
         {
             visualDetail = Mathf.Clamp01(detail);
