@@ -1,40 +1,46 @@
-# Prototype validation checklist (Unity 6, URP)
+# River Rush — verification checklist
 
-The checklist is **not evidence of a passing build** until run inside Unity on the new laptop.
+**Verification levels**
+- **Source-level**: file structure, dependencies and formulas inspected. Does not prove compilation.
+- **Unity Editor**: needs the new laptop, Unity 6 URP, and the menu command.
+- **Device**: needs real Windows PC / Android phone.
 
-## Import and rendering
-- [ ] Create a Unity 6 Universal 3D project; copy `Assets/` folders into it.
-- [ ] All C# scripts compile without Console errors.
-- [ ] Custom URP shader imports without pink materials or shader errors.
-- [ ] River Rush → Create Prototype Scene generates and saves a scene.
-- [ ] Press Play: terrain, water ribbon, player sphere and follow camera all appear.
-- [ ] Water ripples move and pale foam appears near the river banks.
-- [ ] Same seed creates visually identical terrain after restarting the scene.
-- [ ] All water surface points stay above their terrain channel (no excessive clipping).
-- [ ] Centerline height never increases toward the sea.
+## Unity Editor — run from River Rush menu
+- [ ] Unity 6 Universal 3D project imports every C# script, shader and inspector component with **zero Console errors**.
+- [ ] `River Rush → Create Prototype Scene` saves `Assets/Scenes/RiverRushPrototype.unity`.
+- [ ] `River Rush → Validate Prototype Geometry` logs a PASS for its five integrated checks.
+- [ ] Regenerate the same seed twice: terrain, river route and sea outlet match.
+- [ ] Check downhill route, absence of mesh holes and river water clipping on turns.
+- [ ] Verify shader: transparent blue water, flowing white ripples and foam at the bank; ocean opaque.
+- [ ] Running player makes visible water disturbances, which propagate and decay without exploding.
+- [ ] Pickups trigger exactly once, grow water volume/visual width and add a splash.
+- [ ] Floating cube gets physically lifted and pulled downstream.
+- [ ] Running/steering/bank contact and camera follow work.
+- [ ] Player reaches ocean and finish message appears.
 
-## Gameplay
-- [ ] Arrow keys / A-D steer on Windows.
-- [ ] Touch steering works on Android.
-- [ ] Player remains in the river's lateral steering corridor.
-- [ ] Pickups are collected once and visibly increase the player's width.
-- [ ] Camera follows without jitter.
-- [ ] No repeated exceptions in Console.
+## Performance / Android
+- [ ] Play on at least one weak and one strong phone; note Android versions and refresh rate.
+- [ ] Select 30 / 60 / 90 / 120 / Native and compare *actual* FPS counter against requested cap.
+- [ ] For 120Hz display, 90 FPS may map to 60 because Android frame pacing chooses a divisor.
+- [ ] Test Auto for 15 minutes, including thermal throttling and graphics-level downshift.
+- [ ] Verify quality tiers change render resolution / water detail / shadows without errors.
+- [ ] Check GPU overdraw from transparent river and CPU time spent updating wave mesh.
+- [ ] Confirm APK touch steering, aspect ratios and resuming after app backgrounding.
+- [ ] Record average and 1%-low FPS, temperature trends and memory usage.
 
-## Builds
-- [ ] Windows x64 build launches and gameplay matches Editor.
-- [ ] Android APK installs on a real device and input works.
-- [ ] Measure FPS, memory and overheating on Android midrange hardware.
-- [ ] Inspect performance of the transparent river shader.
-- [ ] Validate screens at 16:9, 19.5:9 and a tablet aspect ratio.
+## Windows
+- [ ] Test standalone x64 EXE at 1080p and 1440p, on both integrated and dedicated GPU.
+- [ ] Test Auto/Native on a 144Hz-or-faster screen where available.
+- [ ] A/D and arrow keys steer; F3 toggles counter and F4 toggles graphics UI.
+- [ ] Check vsync / frame pacing and window resize.
 
-## Known gaps, not yet passing features
-- [ ] Real flowing-water physics
-- [ ] Multiple forks and joining channels
-- [ ] Ocean mesh, finish trigger, and victory screen
-- [ ] AI opponents
-- [ ] Multiplayer
-- [ ] Final art, audio and UI
+## Not yet done / not included
+- [ ] Unity Editor test has been run
+- [ ] Windows EXE has been compiled
+- [ ] Android APK has been compiled
+- [ ] Proper 3D fluid simulation / branching water graph
+- [ ] AI opponents and online multiplayer
+- [ ] Production-quality art and responsive UI
 
-## Bug report format
-Unity version; device/OS; Console error text; reproduction steps; screenshot/video; expected and actual results.
+## Bug report
+Unity version; OS/hardware; target FPS versus measured FPS; Console error; reproduction steps; screenshot/video.
