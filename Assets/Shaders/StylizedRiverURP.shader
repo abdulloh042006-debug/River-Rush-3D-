@@ -2,38 +2,42 @@ Shader "RiverRush/StylizedRiverURP"
 {
     Properties
     {
-        _DeepColor ("Deep Water", Color) = (0.035, 0.25, 0.48, 1)
-        _ShallowColor ("Shallow Water", Color) = (0.07, 0.68, 0.78, 1)
-        _FoamColor ("Foam", Color) = (0.85, 0.98, 1.0, 1)
+        _DeepColor ("Deep Water", Color) = (0.025, 0.20, 0.39, 1)
+        _ShallowColor ("Shallow Water", Color) = (0.09, 0.63, 0.77, 1)
+        _FoamColor ("Foam", Color) = (0.87, 0.98, 1, 1)
         _FlowSpeed ("Flow Speed", Range(0, 8)) = 1.8
-        _FoamWidth ("Bank Foam Width", Range(0.02, 0.6)) = 0.18
-        _WaveStrength ("Wave Strength", Range(0, 0.4)) = 0.045
-        _Opacity ("Opacity", Range(0, 1)) = 0.91
+        _FoamWidth ("Shore Foam", Range(0.01, 0.6)) = 0.19
+        _WaveStrength ("Vertex Wave Height", Range(0, 0.4)) = 0.04
+        _Opacity ("Opacity", Range(0, 1)) = 0.93
+        _Detail ("Effect Quality", Range(0, 1)) = 0.65
     }
     SubShader
     {
         Tags { "RenderPipeline"="UniversalPipeline" "RenderType"="Transparent" "Queue"="Transparent" }
         Pass
         {
-            Name "RiverSurface"
+            Name "StylizedRiver"
             Tags { "LightMode"="UniversalForward" }
             Cull Off
             ZWrite Off
+            ZTest LEqual
             Blend SrcAlpha OneMinusSrcAlpha
 
             HLSLPROGRAM
+            #pragma target 2.0
             #pragma vertex vert
             #pragma fragment frag
             #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"
 
             CBUFFER_START(UnityPerMaterial)
-                float4 _DeepColor;
-                float4 _ShallowColor;
-                float4 _FoamColor;
-                float _FlowSpeed;
-                float _FoamWidth;
-                float _WaveStrength;
-                float _Opacity;
+            float4 _DeepColor;
+            float4 _ShallowColor;
+            float4 _FoamColor;
+            float _FlowSpeed;
+            float _FoamWidth;
+            float _WaveStrength;
+            float _Opacity;
+            float _Detail;
             CBUFFER_END
 
             struct Attributes
@@ -51,10 +55,10 @@ Shader "RiverRush/StylizedRiverURP"
             Varyings vert(Attributes input)
             {
                 Varyings output;
-                float3 p = input.positionOS.xyz;
-                // Very small displacement to keep mobile vertex cost low.
-                p.y += sin(input.uv.y * 2.4 - _Time.y * _FlowSpeed) * _WaveStrength;
-                output.positionCS = TransformObjectToHClip(p);
+                float3 pos = input.positionOS.xyz;
+                float flowTime = _Time.y * _FlowSpeed;
+                pos.y += sin(input.uv.y * 2.4 - flowTime) * _WaveStrength;
+                output.positionCS = TransformObjectToHClip(pos);
                 output.uv = input.uv;
                 return output;
             }
@@ -62,17 +66,22 @@ Shader "RiverRush/StylizedRiverURP"
             half4 frag(Varyings input) : SV_Target
             {
                 float2 uv = input.uv;
-                float edge = saturate(abs(uv.x - 0.5) * 2.0);
-                float wave1 = sin(uv.y * 8.0 - _Time.y * _FlowSpeed * 3.2 + sin(uv.x * 15.0));
-                float wave2 = sin(uv.y * 13.0 - _Time.y * _FlowSpeed * 2.1 - uv.x * 19.0);
-                float ripple = (wave1 + wave2) * 0.5;
-                float foam = smoothstep(1.0 - _FoamWidth, 1.0,
-                                        edge + ripple * 0.07);
-                float highlights = smoothstep(0.67, 0.95, wave1 * 0.5 + 0.5) * 0.11;
-                float3 water = lerp(_DeepColor.rgb, _ShallowColor.rgb, edge * 0.6);
-                water += highlights;
-                water = lerp(water, _FoamColor.rgb, foam * 0.88);
-                return half4(water, _Opacity);
+                float t = _Time.y * _FlowSpeed;
+                float banks = saturate(abs(uv.x - 0.5) * 2.0);
+                float broadWave = sin(uv.y * 7.0 - t * 3.0 + sin(uv.x * 13.0));
+                float smallWave = sin(uv.y * 16.0 - t * 4.7 + uv.x * 22.0);
+                float smoothRipples = broadWave * 0.6 + smallWave * 0.4 * _Detail;
+                float shoreline = smoothstep(1.0 - _FoamWidth, 1.0,
+                    banks + smoothRipples * 0.075);
+                float crest = smoothstep(0.76, 0.99, broadWave * 0.5 + 0.5)
+                             * (0.06 + 0.16 * _Detail);
+                float foamLines = smoothstep(0.91, 0.995,
+                    sin(uv.y * 21.0 - t * 5.6 + uv.x * 7.0) * 0.5 + 0.5)
+                    * _Detail * 0.12;
+                float3 rgb = lerp(_DeepColor.rgb, _ShallowColor.rgb,
+                                  saturate(0.18 + banks * 0.63 + smoothRipples * 0.07));
+                rgb = lerp(rgb, _FoamColor.rgb, saturate(shoreline * 0.9 + crest + foamLines));
+                return half4(rgb, _Opacity);
             }
             ENDHLSL
         }
