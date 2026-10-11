@@ -50,6 +50,7 @@ namespace RiverRush.Editor
                 "Assets/Materials/Ocean.mat", "RiverRush/StylizedOceanURP",
                 new Color(0.015f, 0.22f, 0.39f));
             Object.DestroyImmediate(ocean.GetComponent<MeshCollider>());
+            ocean.AddComponent<OceanWaterPhysics>();
 
             var player = GameObject.CreatePrimitive(PrimitiveType.Sphere);
             player.name = "Player - River Droplet";
