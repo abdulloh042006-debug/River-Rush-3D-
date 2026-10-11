@@ -20,10 +20,13 @@ APK or EXE, and there is not yet a fully initialized Unity project.**
 ## 2. Create the game level
 
 1. From Unity menu choose **River Rush > Create Prototype Scene**.
-2. The command creates terrain, random-seed river, animated flowing surface, ocean,
-   wave simulation, player, five AI racers, pickups, water-physics crate, follow camera,
-   FPS configuration, and race countdown + leaderboard.
-3. Run **River Rush > Validate Prototype Geometry**. Fix reported failures.
+2. The command creates height-colored mountains/forests/snowcaps/sandy coast,
+   the random-seed main river plus five carved tributaries, four batched low-poly
+   forest/rock/shrub layers, animated water surfaces, ocean, player, five AI racers,
+   five confluence pickups, wave simulation and a floating crate. It also adds
+   nature audio, transparent blue racers, the FPS menu and race leaderboard.
+3. Run **River Rush > Validate Prototype Geometry**. It now also checks tributary
+   geometry, confluence pickups, biome shader and generated forests. Fix any reported failures.
 4. Press **Play**. Wait for the 3-second countdown, then steer using A/D or arrow
    keys. Test camera, waves, floating crate, pickups, bots, rank and ocean finish.
 5. Click **NEW RANDOM RACE** to reload with a fresh procedural seed.
@@ -47,9 +50,13 @@ APK or EXE, and there is not yet a fully initialized Unity project.**
 
 ## 5. GitHub validation available without Unity
 
-On GitHub select **Actions > Source Audit (No Unity License)**. The workflow also
-starts on pushes to `main` and pull requests. It runs `python tools/source_audit.py`
-and only verifies source structure and expected dependencies, not C# compilation.
+On GitHub select **Actions > Source and Procedural World Tests (No Unity License)**.
+The workflow also starts on pushes to `main` and pull requests. It runs
+`python tools/source_audit.py` plus a real .NET 8 compile/run of the same
+`RiverBranchMath.cs` that Unity uses. The C# smoke test covers **2709 seeded world
+configurations / 13545 tributaries / 243810 points** for repeatability, directional
+monotonicity and precise main-river confluence. This **does not** compile the full
+Unity project or validate rendered meshes and shaders.
 
 ## Outstanding launch blockers
 
