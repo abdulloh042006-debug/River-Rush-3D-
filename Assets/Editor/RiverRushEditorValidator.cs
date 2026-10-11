@@ -109,8 +109,8 @@ namespace RiverRush.Editor
             // laptop has no audio device connected at the time of validation.
             if (waterColors.CrowdThreshold < 2 || waterColors.ConnectedHumanCount < 1)
                 failures++;
-            if (!waterColors.FullRandomColors && waterColors.ConnectedHumanCount == 1)
-                waterColors.RefreshPalette();
+            // Palette materials are generated in Play Mode. Avoid assigning
+            // transient runtime materials while validating an editor scene.
             var dropletRenderer = runner.GetComponent<Renderer>();
             if (dropletRenderer == null || dropletRenderer.sharedMaterial == null ||
                 dropletRenderer.sharedMaterial.shader == null ||
