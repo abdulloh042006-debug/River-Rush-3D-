@@ -8,6 +8,9 @@ namespace RiverRush.Gameplay
     {
         [SerializeField] private RiverRoute route;
         [SerializeField] private RiverFlowField flow;
+        [SerializeField] private bool humanControlled = true;
+        [SerializeField] private float spawnLateral = 0f;
+        [SerializeField] private float extraPaddleSpeed = 0f;
         [SerializeField, Min(0f)] private float paddleAcceleration = 2.5f;
         [SerializeField, Min(0f)] private float sideAcceleration = 25f;
         [SerializeField, Min(0f)] private float lateralDamping = 5f;
@@ -22,34 +25,54 @@ namespace RiverRush.Gameplay
         private bool completed;
         private WaterWaveSimulator waves;
         private float nextWakeImpulse;
+        private float botSteer;
+        private RiverRaceManager raceManager;
 
         public float Progress => meters;
         public float NormalizedProgress => route != null && route.TotalLength > 0f
             ? Mathf.Clamp01(meters / route.TotalLength) : 0f;
         public float CurrentSpeed => downstreamSpeed;
         public bool Finished => completed;
+        public bool IsHumanControlled => humanControlled;
+        public float LateralPosition => lateral;
+        public float SidewaysSpeed => sidewaysSpeed;
+
+        public void ConfigureBot(float paddleBonus, float startingLateral)
+        {
+            humanControlled = false;
+            extraPaddleSpeed = Mathf.Max(-1f, paddleBonus);
+            spawnLateral = startingLateral;
+        }
+
+        public void SetBotSteer(float steering)
+        {
+            if (!humanControlled) botSteer = Mathf.Clamp(steering, -1f, 1f);
+        }
 
         private void Start()
         {
             if (route == null) route = FindFirstObjectByType<RiverRoute>();
             if (flow == null) flow = FindFirstObjectByType<RiverFlowField>();
             waves = FindFirstObjectByType<WaterWaveSimulator>();
+            raceManager = FindFirstObjectByType<RiverRaceManager>();
+            lateral = spawnLateral;
             if (route != null && route.Points == null) route.Rebuild();
-            if (route != null && route.SampleBank(0f, 0f, out Vector3 start))
+            if (route != null && route.SampleBank(0f, lateral, out Vector3 start))
                 transform.position = start;
         }
 
         private void Update()
         {
             if (completed || route == null || flow == null || Time.deltaTime <= 0f) return;
+            if (raceManager != null && !raceManager.IsRacing) return;
             float deltaTime = Mathf.Min(Time.deltaTime, 0.05f);
-            float steer = GetSteer();
+            float steer = humanControlled ? GetSteer() : botSteer;
             if (!flow.TrySample(meters, lateral, out Vector3 velocity, out _, out float targetSpeed))
                 return;
 
             // Momentum catches up with the current, rather than snapping to fixed spline speed.
             downstreamSpeed = Mathf.MoveTowards(downstreamSpeed,
-                targetSpeed + paddleAcceleration, 12f * deltaTime);
+                targetSpeed + paddleAcceleration + extraPaddleSpeed, 12f * deltaTime);
             sidewaysSpeed += steer * sideAcceleration * deltaTime;
             sidewaysSpeed = Mathf.MoveTowards(sidewaysSpeed, 0f, lateralDamping * deltaTime);
             lateral += sidewaysSpeed * deltaTime;
@@ -76,7 +99,7 @@ namespace RiverRush.Gameplay
                         Quaternion.LookRotation(flat.normalized), turnRate * deltaTime);
             }
 
-            if (waves != null && Time.time >= nextWakeImpulse)
+            if (humanControlled && waves != null && Time.time >= nextWakeImpulse)
             {
                 waves.AddImpulse(meters, Mathf.Min(2f, downstreamSpeed * 0.09f), 4.5f);
                 nextWakeImpulse = Time.time + 0.20f;
