@@ -49,6 +49,11 @@ namespace RiverRush.Graphics
         [ContextMenu("Refresh Water Palette")]
         public void RefreshPalette()
         {
+            if (!Application.isPlaying)
+            {
+                Debug.Log("River Rush: palette previews are applied in Play Mode, not while editing the scene.");
+                return;
+            }
             if (terrain == null) terrain = FindFirstObjectByType<ProceduralTerrain>();
             int seed = terrain != null ? terrain.Seed : 9182;
             if (environmentProperties == null)
