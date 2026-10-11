@@ -15,6 +15,8 @@ namespace RiverRush.World
         public IReadOnlyList<Vector3> Points => points;
         public float TotalLength => distances != null && distances.Length > 0 ? distances[distances.Length - 1] : 0f;
         public float Width => terrain != null ? terrain.RiverWidth : 10f;
+        public float DistanceAt(int index) => distances == null || distances.Length == 0
+            ? 0f : distances[Mathf.Clamp(index, 0, distances.Length - 1)];
         public ProceduralTerrain Terrain => terrain;
 
         [ContextMenu("Rebuild Route")]
