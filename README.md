@@ -14,9 +14,11 @@ Source-code prototype of a 3D river-racing game. A seeded mountain world leads t
 - Dynamic-body buoyancy/current drag in the river and ocean, plus floating-crate test.
 - Water-volume pickups, visible player growth, foam-like wake trail.
 - Opaque stylized ocean with approximate ocean buoyancy/current and prototype finish state.
+- Five **offline AI racers**, three-second countdown, time/progress leaderboard, finish placement, and replay with a new randomized map.
+- A license-free GitHub Actions source audit (Python). This checks source structure and key dependency markers, **not** a Unity build.
 - **Android & Windows performance:** Auto/BatterySaver/Balanced/High/Ultra; dynamic URP render scale, shadow/LOD distance, shader detail, wave mesh update rate; FPS modes Auto/30/60/90/120/Native, on-screen FPS counter and quality menu.
 
-This is an **arcade water-physics approximation**, not full 3D computational fluid dynamics. Real branching tributary hydrology, turbulence simulation, wet-ground interaction, physically computed liquid merging, AI and multiplayer remain future work.
+This is an **arcade water-physics approximation**, not full 3D computational fluid dynamics. Real branching tributary hydrology, turbulence simulation, wet-ground interaction, physically computed liquid merging, advanced AI and online multiplayer remain future work.
 
 ## Open on a new laptop
 
@@ -26,7 +28,7 @@ This is an **arcade water-physics approximation**, not full 3D computational flu
 4. Wait for C# / URP shader imports to finish. Ensure Unity's **Active Input Handling** is set to **Both** (or legacy Input Manager) because the current runner reads `Input.GetAxisRaw`.
 5. Click **River Rush → Create Prototype Scene**.
 6. Click **River Rush → Validate Prototype Geometry** and inspect all Console logs. Save the scene.
-7. Press **Play**. Control with **A/D** or arrow keys; Android touch steering uses left/right halves of the screen.
+7. Press **Play**. The countdown starts a race against five offline AI racers. Control with **A/D** or arrow keys; Android touch steering uses left/right halves of the screen. Reaching the ocean shows your place/time; use **New Random Race** to restart.
 8. **F3** toggles FPS counter, **F4** opens performance settings on Windows; on mobile tap **Graphics**. The settings also allow 30/60/90/120 FPS or Native refresh mode.
 9. For APK, install Android Build Support / SDK / NDK / OpenJDK via Unity Hub and follow Android build settings. Test APK on an actual device. For EXE, build Windows x64 and test standalone.
 
@@ -35,6 +37,7 @@ This is an **arcade water-physics approximation**, not full 3D computational flu
 - [Water physics + FPS tiers](docs/WATER_AND_FPS.md)
 - [Prototype validation checklist](docs/PROTOTYPE_TEST_CHECKLIST.md)
 - [Five-round review log](docs/AUDIT_5_ROUNDS.md)
+- [GitHub static source audit](tools/source_audit.py) — runs automatically on commits to `main` via `.github/workflows/source-audit.yml`. No Unity license required.
 
 ## Next milestones
 
@@ -42,4 +45,4 @@ This is an **arcade water-physics approximation**, not full 3D computational flu
 2. Test physical water/river interactions on Android and Windows, measure 1% low FPS, CPU/GPU cost and thermals.
 3. Upgrade the purely linear river to a branching drainage graph and procedural forks.
 4. Replace the temporary IMGUI debug/settings screens and primitive art with finished UI, assets, VFX and audio.
-5. Add AI races, balance and later synchronized multiplayer. Publish APK/EXE only after verified builds.
+5. Improve AI path selection and balancing, then add synchronized multiplayer. Publish APK/EXE only after verified builds.
