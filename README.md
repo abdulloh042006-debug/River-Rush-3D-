@@ -16,6 +16,7 @@ Source-code prototype of a 3D river-racing game. A seeded mountain world leads t
 - Opaque stylized ocean with approximate ocean buoyancy/current and prototype finish state.
 - Five **offline AI racers**, three-second countdown, time/progress leaderboard, finish placement, and replay with a new randomized map.
 - A license-free GitHub Actions source audit (Python). This checks source structure and key dependency markers, **not** a Unity build.
+- Editor menu shortcuts to build **Windows x64 EXE** or **Android APK** once a Unity installation is available. No binary has yet been generated.
 - **Android & Windows performance:** Auto/BatterySaver/Balanced/High/Ultra; dynamic URP render scale, shadow/LOD distance, shader detail, wave mesh update rate; FPS modes Auto/30/60/90/120/Native, on-screen FPS counter and quality menu.
 
 This is an **arcade water-physics approximation**, not full 3D computational fluid dynamics. Real branching tributary hydrology, turbulence simulation, wet-ground interaction, physically computed liquid merging, advanced AI and online multiplayer remain future work.
@@ -30,10 +31,11 @@ This is an **arcade water-physics approximation**, not full 3D computational flu
 6. Click **River Rush → Validate Prototype Geometry** and inspect all Console logs. Save the scene.
 7. Press **Play**. The countdown starts a race against five offline AI racers. Control with **A/D** or arrow keys; Android touch steering uses left/right halves of the screen. Reaching the ocean shows your place/time; use **New Random Race** to restart.
 8. **F3** toggles FPS counter, **F4** opens performance settings on Windows; on mobile tap **Graphics**. The settings also allow 30/60/90/120 FPS or Native refresh mode.
-9. For APK, install Android Build Support / SDK / NDK / OpenJDK via Unity Hub and follow Android build settings. Test APK on an actual device. For EXE, build Windows x64 and test standalone.
+9. For APK, install Android Build Support / SDK / NDK / OpenJDK via Unity Hub, switch active build target to Android, then click **River Rush → Build → Android APK**. For EXE, switch target to Windows x64, then click **River Rush → Build → Windows x64 EXE**. A menu build succeeds only when Unity can compile and required platform modules are installed.
 
 ## Documents
 
+- [New laptop setup / APK + EXE build guide](docs/NEW_LAPTOP_SETUP.md)
 - [Water physics + FPS tiers](docs/WATER_AND_FPS.md)
 - [Prototype validation checklist](docs/PROTOTYPE_TEST_CHECKLIST.md)
 - [Five-round review log](docs/AUDIT_5_ROUNDS.md)
