@@ -1,55 +1,45 @@
-# River Rush 3D
+# River Rush 3D — Unity 6 (Android + Windows)
 
-A Unity 6 **Universal 3D (URP)** prototype for Android and Windows: steer a growing river from a mountain source to the sea across seeded procedural terrain.
+Source-code prototype of a 3D river-racing game. A seeded mountain world leads to the ocean; the player follows a hydraulic current, steers around banks, gathers tributaries, creates ripples, and aims for the sea.
 
-> **Development status:** source-code prototype. The project has **not** yet been opened or compiled in Unity, and there are **no verified APK / EXE builds**. No Unity installation is needed on the old laptop.
+**Current status:** code is pushed; source structure and numerical formulas were reviewed. **Unity compilation, the actual 3D scene, real-device performance and APK/EXE builds have not been run** (the old laptop cannot run Unity well). This is not yet a release-quality game.
 
-## Implemented in source
+## Features implemented as code
 
-| Component | Purpose |
-| --- | --- |
-| `ProceduralTerrain.cs` | Reproducible 3D terrain; seeded mountain noise and a strictly downhill channel bed |
-| `RiverRoute.cs` | Samples the same channel's centerline and elevations |
-| `RiverWaterSurface.cs` | Generates a curved two-sided water mesh with flow UVs |
-| `StylizedRiverURP.shader` | Low-cost URP water colors, moving ripples, shore foam |
-| `RiverRunner.cs` | Prototype forward movement and keyboard/touch steering |
-| `RiverGrowth.cs` + `TributaryPickup.cs` | Volume pickups and visible size growth |
-| `RiverFollowCamera.cs` | Smooth chase camera |
-| `RiverRushSceneBuilder.cs` | Unity editor menu to create a demo scene with placeholder objects |
+- Reproducible seeded terrain and monotonic downhill river channel.
+- World-space physical-distance spline/arc-length, samples and slopes.
+- Flow speed computed from grade, gravity-like acceleration, friction and shore slowdown; turning inertia, bank boundaries and eddies.
+- Dampened 1D physically-inspired surface waves with swimmer and tributary impulse events.
+- Water mesh displaced by actual simulated waves, plus inexpensive URP foam/ripple shader.
+- Dynamic-body buoyancy/current drag and floating-crate test.
+- Water-volume pickups, visible player growth, foam-like wake trail.
+- Opaque stylized ocean and prototype finish state.
+- **Android & Windows performance:** Auto/BatterySaver/Balanced/High/Ultra; dynamic URP render scale, shadow/LOD distance, shader detail, wave mesh update rate; FPS modes Auto/30/60/90/120/Native, on-screen FPS counter and quality menu.
 
-The river water is **animated geometry**, not simulated fluid. Branching physics, AI, proper ocean, networking, optimization validation and builds are future phases.
+This is an **arcade water-physics approximation**, not full 3D computational fluid dynamics. Real branching tributary hydrology, turbulence simulation, wet-ground interaction, physically computed liquid merging, AI and multiplayer remain future work.
 
-## Start on a new laptop
+## Open on a new laptop
 
-1. Install **Unity Hub**, a **Unity 6** editor, and Android Build Support (SDK/NDK + OpenJDK) if APK export is required. Add Windows Build Support if required for your installed Unity editor / build configuration.
-2. In Unity Hub create a **Universal 3D (URP)** project. Do **not** choose Built-in or HDRP: the custom shader is written for URP.
-3. Download/clone this repository. Copy its `Assets/Scripts`, `Assets/Shaders` and `Assets/Editor` folders into your new Unity project's `Assets/` directory. Let Unity import the scripts and shader.
-4. Use **River Rush → Create Prototype Scene** from Unity's top menu.
-5. Use **River Rush → Validate Prototype Geometry** to check channel slope, water mesh and assigned shader. Then open `Assets/Scenes/RiverRushPrototype.unity` and press **Play**.
-6. Windows test: A/D or left/right arrow keys. Android test: drag/hold to the left or right side of the screen. If using the new Input System exclusively, enable **Both** under Player → Active Input Handling before testing this prototype.
-7. Check Console for errors and use the checklist in `docs/PROTOTYPE_TEST_CHECKLIST.md`.
+1. Install **Unity Hub and Unity 6**.
+2. Create a **Universal 3D (URP)** Unity project. Do not choose HDRP or Built-In.
+3. Download or clone this repository; copy its `Assets/Scripts`, `Assets/Shaders`, and `Assets/Editor` folders into that new URP project's `Assets` directory. This repository contains Unity source files, **not** a complete Unity project including `ProjectSettings`.
+4. Wait for C# / URP shader imports to finish. Ensure Unity's **Active Input Handling** is set to **Both** (or legacy Input Manager) because the current runner reads `Input.GetAxisRaw`.
+5. Click **River Rush → Create Prototype Scene**.
+6. Click **River Rush → Validate Prototype Geometry** and inspect all Console logs. Save the scene.
+7. Press **Play**. Control with **A/D** or arrow keys; Android touch steering uses left/right halves of the screen.
+8. **F3** toggles FPS counter, **F4** opens performance settings on Windows; on mobile tap **Graphics**. The settings also allow 30/60/90/120 FPS or Native refresh mode.
+9. For APK, install Android Build Support / SDK / NDK / OpenJDK via Unity Hub and follow Android build settings. Test APK on an actual device. For EXE, build Windows x64 and test standalone.
 
-### Demo expectations
+## Documents
 
-- Terrain is rebuilt using the same integer seed on every run.
-- A river corridor slopes from mountainous -Z toward sea-level +Z.
-- A ribbon mesh follows the route with a simple animated water material.
-- A placeholder sphere moves down the river and can pick up three tributary spheres to increase size.
-- The camera follows the sphere.
+- [Water physics + FPS tiers](docs/WATER_AND_FPS.md)
+- [Prototype validation checklist](docs/PROTOTYPE_TEST_CHECKLIST.md)
+- [Five-round review log](docs/AUDIT_5_ROUNDS.md)
 
-### Mobile notes
+## Next milestones
 
-Keep terrain resolution at 64–96 initially, use URP without expensive post-processing, and measure FPS on a real Android device before raising detail. Transparent water still causes overdraw: this shader uses one pass and no texture sampling. Actual performance has not been measured.
-
-### Known limitations
-
-- No ocean mesh or win condition yet.
-- Channel curvature is fixed per seed, with mountain-to-sea slope; full random river network will come later.
-- Water is not volumetric or physically simulated; pickups only increase a size/volume value.
-- Placeholder scene is made with primitives, not final game art.
-- The repository currently contains **Assets source files**, not a fully initialized Unity project (Unity will generate its own Packages/ and ProjectSettings/ when you create the URP project).
-- Without testing in a matching Unity 6 project, shader import, runtime behavior and Android compatibility remain unverified.
-
-## Repository
-
-https://github.com/abdulloh042006-debug/River-Rush-3D-
+1. Compile and play in Unity on the new laptop; fix any imported shader or scene errors.
+2. Test physical water/river interactions on Android and Windows, measure 1% low FPS, CPU/GPU cost and thermals.
+3. Upgrade the purely linear river to a branching drainage graph and procedural forks.
+4. Replace the temporary IMGUI debug/settings screens and primitive art with finished UI, assets, VFX and audio.
+5. Add AI races, balance and later synchronized multiplayer. Publish APK/EXE only after verified builds.
