@@ -10,6 +10,12 @@ Date: 2026-10-12. This log records *source code audits* and the changes pushed t
 | 4 — FPS and graphics | No hardware adaptation or explicit frame targets. | Auto/BatterySaver/Balanced/High/Ultra, URP render scale, shadows, LOD, water detail/update frequency, FPS overlay and menu, Auto/30/60/90/120/Native refresh, device-aware auto scaling. | Evaluated target-rate/divisor examples; verified interfaces in code, **not** real measured FPS. |
 | 5 — Integration and regressions | Water code existed as isolated scripts; no reproducible integrated demo or validation. | Unity menu builds scene with terrain, flowing water, wave simulation, float test, pickup events, ocean, chase camera and quality controller. Added editor validator, detailed test checklist and onboarding. | Fetched 16 key source/shader/editor files; checked bracket/parenthesis balance, key dependencies and five subsystem invariants. |
 
+## Additional regression fixes after the five cycles
+
+- **Core requirement gap corrected:** a hardcoded seed made every new race use the same map. `ProceduralTerrain` now generates a new seed each play; `RiverRaceBootstrap` rebuilds the route and relocates pickups / floating physics objects to match it. Uncheck `Randomize Each Race` in Inspector for deterministic replay.
+- **Ocean physics gap corrected:** floating bodies now use a low-cost ocean buoyancy/drift fallback when outside the river, through `OceanWaterPhysics`.
+- Editor validation checks the seed bootstrap, wave simulator and ocean physics components.
+
 ## Independent formula sanity check
 
 - 128 samples of the analytic centerline bed decreased monotonically toward the ocean in a direct formula check.
