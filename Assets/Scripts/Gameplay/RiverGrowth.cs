@@ -13,6 +13,7 @@ namespace RiverRush.Gameplay
         [SerializeField, Min(1f)] private float maxVolume = 100f;
         [SerializeField, Min(0f)] private float visualScaleFactor = 0.035f;
         [SerializeField] private Transform waterVisual;
+
         private float volume;
         private Vector3 initialScale;
 
@@ -21,8 +22,10 @@ namespace RiverRush.Gameplay
 
         private void Awake()
         {
+            if (waterVisual == null) waterVisual = transform;
+            initialScale = waterVisual.localScale;
             volume = startingVolume;
-            if (waterVisual != null) initialScale = waterVisual.localScale;
+            UpdateVisual();
         }
 
         public void AddWater(float amount)
@@ -36,7 +39,8 @@ namespace RiverRush.Gameplay
         {
             if (waterVisual == null) return;
             float growth = 1f + (volume - startingVolume) * visualScaleFactor;
-            waterVisual.localScale = new Vector3(initialScale.x * growth, initialScale.y, initialScale.z * growth);
+            waterVisual.localScale = new Vector3(
+                initialScale.x * growth, initialScale.y, initialScale.z * growth);
         }
 
         private void OnTriggerEnter(Collider other)
@@ -44,6 +48,7 @@ namespace RiverRush.Gameplay
             var tributary = other.GetComponent<TributaryPickup>();
             if (tributary != null) tributary.TryCollect(this);
         }
-    }
 
+        private void OnValidate() => maxVolume = Mathf.Max(startingVolume, maxVolume);
+    }
 }
