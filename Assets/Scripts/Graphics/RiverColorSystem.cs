@@ -1,126 +1,170 @@
 using System;
 using UnityEngine;
 using RiverRush.Gameplay;
+using RiverRush.World;
 
 namespace RiverRush.Graphics
 {
     /// <summary>
-    /// Natural blue / translucent cyan racers at low population.
-    /// When REAL human participants >= crowdThreshold, all racers get full-spectrum
-    /// deterministic colors. Offline AI bots do not count as real people.
-    /// Environments stay naturally blue regardless of number of players.
+    /// Real humans (not bots) control when we expand from naturally translucent blue
+    /// to every hue. Racers share a small palette of materials for URP batching.
+    /// Call SetConnectedHumanCount from the multiplayer authority when it exists.
     /// </summary>
     [DefaultExecutionOrder(100)]
     public sealed class RiverColorSystem : MonoBehaviour
     {
         [SerializeField, Min(2)] private int crowdThreshold = 8;
         [SerializeField, Min(1)] private int connectedHumanCount = 1;
-        [SerializeField] private bool inspectorCrowdPreview = false;
+        [SerializeField] private bool inspectorCrowdPreview;
         [SerializeField, Min(1)] private int previewHumanCount = 12;
-        [SerializeField] private RiverRush.World.ProceduralTerrain terrain;
-        [Header("Water tint")]
+        [SerializeField] private ProceduralTerrain terrain;
         [SerializeField, Range(0.3f, 1f)] private float dropletOpacity = 0.77f;
 
-        private MaterialPropertyBlock properties;
-        private int lastPaletteSeed = int.MinValue;
+        private const int NaturalVariants = 12;
+        private const int CrowdVariants = 48;
+        private Material[] palette;
+        private MaterialPropertyBlock environmentProperties;
+        private int activeSeed = int.MinValue;
+        private bool activeCrowdMode;
+
         public int ConnectedHumanCount => connectedHumanCount;
         public int CrowdThreshold => crowdThreshold;
-        public bool FullRandomColors => (inspectorCrowdPreview ? previewHumanCount : connectedHumanCount)
-                                        >= crowdThreshold;
+        public bool FullRandomColors =>
+            (inspectorCrowdPreview ? previewHumanCount : connectedHumanCount) >= crowdThreshold;
 
         private void Start()
         {
-            if (terrain == null) terrain = FindFirstObjectByType<RiverRush.World.ProceduralTerrain>();
+            if (terrain == null) terrain = FindFirstObjectByType<ProceduralTerrain>();
             RefreshPalette();
         }
 
-        /// <summary>Call from an authoritative multiplayer session as humans join/leave.</summary>
         public void SetConnectedHumanCount(int count)
         {
-            int newCount = Mathf.Max(1, count);
-            if (connectedHumanCount == newCount && !inspectorCrowdPreview) return;
-            connectedHumanCount = newCount;
+            int corrected = Mathf.Max(1, count);
+            if (connectedHumanCount == corrected && !inspectorCrowdPreview) return;
+            connectedHumanCount = corrected;
             RefreshPalette();
         }
 
         [ContextMenu("Refresh Water Palette")]
         public void RefreshPalette()
         {
-            if (terrain == null) terrain = FindFirstObjectByType<RiverRush.World.ProceduralTerrain>();
+            if (terrain == null) terrain = FindFirstObjectByType<ProceduralTerrain>();
             int seed = terrain != null ? terrain.Seed : 9182;
-            lastPaletteSeed = seed;
-            if (properties == null) properties = new MaterialPropertyBlock();
+            if (environmentProperties == null)
+                environmentProperties = new MaterialPropertyBlock();
 
-            // These shades never leave the natural blue/turquoise family.
-            var rng = new System.Random(unchecked(seed ^ 0x37A4D1));
-            float waterHue = 0.505f + (float)rng.NextDouble() * 0.065f;
-            float seaHue = 0.54f + (float)rng.NextDouble() * 0.065f;
-            Color shallow = Color.HSVToRGB(waterHue, 0.72f, 0.82f);
-            Color deep = Color.HSVToRGB(Mathf.Clamp01(waterHue + 0.065f), 0.82f, 0.43f);
+            // Mountains, river and ocean always retain a natural water color.
+            var waterRng = new System.Random(unchecked(seed ^ 0x37A4D1));
+            float hue = 0.505f + 0.065f * (float)waterRng.NextDouble();
+            float seaHue = 0.54f + 0.065f * (float)waterRng.NextDouble();
+            Color shallow = Color.HSVToRGB(hue, 0.72f, 0.82f);
+            Color deep = Color.HSVToRGB(Mathf.Clamp01(hue + 0.065f), 0.82f, 0.43f);
             Color ocean = Color.HSVToRGB(seaHue, 0.78f, 0.41f);
-            Color oceanHighlight = Color.HSVToRGB(Mathf.Max(0f, seaHue - 0.04f), 0.56f, 0.77f);
+            Color shine = Color.HSVToRGB(Mathf.Max(0f, seaHue - 0.04f), 0.56f, 0.77f);
 
-            var rivers = FindObjectsByType<RiverRush.World.RiverWaterSurface>(FindObjectsSortMode.None);
-            foreach (var water in rivers)
+            foreach (var water in FindObjectsByType<RiverWaterSurface>(FindObjectsSortMode.None))
             {
                 Renderer renderer = water.GetComponent<Renderer>();
                 if (renderer == null) continue;
-                renderer.GetPropertyBlock(properties);
-                properties.SetColor("_DeepColor", deep);
-                properties.SetColor("_ShallowColor", shallow);
-                renderer.SetPropertyBlock(properties);
-                properties.Clear();
+                renderer.GetPropertyBlock(environmentProperties);
+                environmentProperties.SetColor("_DeepColor", deep);
+                environmentProperties.SetColor("_ShallowColor", shallow);
+                renderer.SetPropertyBlock(environmentProperties);
+                environmentProperties.Clear();
             }
-            var oceanPhysics = FindFirstObjectByType<RiverRush.World.OceanWaterPhysics>();
-            if (oceanPhysics != null)
+            var sea = FindFirstObjectByType<OceanWaterPhysics>();
+            if (sea != null)
             {
-                var renderer = oceanPhysics.GetComponent<Renderer>();
+                Renderer renderer = sea.GetComponent<Renderer>();
                 if (renderer != null)
                 {
-                    renderer.GetPropertyBlock(properties);
-                    properties.SetColor("_OceanColor", ocean);
-                    properties.SetColor("_Highlight", oceanHighlight);
-                    renderer.SetPropertyBlock(properties);
-                    properties.Clear();
+                    renderer.GetPropertyBlock(environmentProperties);
+                    environmentProperties.SetColor("_OceanColor", ocean);
+                    environmentProperties.SetColor("_Highlight", shine);
+                    renderer.SetPropertyBlock(environmentProperties);
+                    environmentProperties.Clear();
                 }
             }
 
+            EnsurePalette(seed);
             var racers = FindObjectsByType<RiverRunner>(FindObjectsSortMode.None);
-            // Sort for identical seed => identical visible colors regardless of Unity object iteration.
             Array.Sort(racers, (a, b) => string.CompareOrdinal(a.name, b.name));
-            var colors = new System.Random(unchecked(seed ^ 0x5C7013));
-            for (int i = 0; i < racers.Length; i++)
+            if (palette != null)
             {
-                var renderer = racers[i].GetComponent<Renderer>();
-                if (renderer == null) continue;
-                Color tint;
-                if (FullRandomColors)
+                // Full-spectrum colors cover the hue wheel. Seed changes their
+                // offset on every race; the pool is shared rather than one material
+                // allocation per human, preserving batching at large player counts.
+                for (int i = 0; i < racers.Length; i++)
                 {
-                    // More players: saturated red, purple, green, yellow etc. allowed.
-                    tint = Color.HSVToRGB((float)colors.NextDouble(),
-                        0.64f + 0.30f * (float)colors.NextDouble(),
-                        0.85f + 0.15f * (float)colors.NextDouble());
+                    var renderer = racers[i].GetComponent<Renderer>();
+                    if (renderer == null) continue;
+                    int index = racers[i].IsHumanControlled && !FullRandomColors
+                        ? 0 : (i + (FullRandomColors ? 0 : 1)) % palette.Length;
+                    renderer.SetPropertyBlock(null); // clear old overrides on racer only
+                    renderer.sharedMaterial = palette[index];
                 }
-                else
-                {
-                    // Player starts brighter cyan; other streams get diverse NATURAL blues.
-                    float hue = racers[i].IsHumanControlled
-                        ? 0.515f + 0.025f * (float)colors.NextDouble()
-                        : 0.49f + 0.11f * (float)colors.NextDouble();
-                    tint = Color.HSVToRGB(hue, 0.46f + 0.30f * (float)colors.NextDouble(),
-                                          0.78f + 0.21f * (float)colors.NextDouble());
-                }
-                renderer.GetPropertyBlock(properties);
-                properties.SetColor("_BaseTint", tint);
-                properties.SetFloat("_Opacity", racers[i].IsHumanControlled
-                    ? dropletOpacity : Mathf.Clamp01(dropletOpacity - 0.05f));
-                renderer.SetPropertyBlock(properties);
-                properties.Clear();
             }
-            Debug.Log("River Rush palette: seed=" + lastPaletteSeed +
-                      ", human players=" + connectedHumanCount +
-                      ", mode=" + (FullRandomColors ? "Full random" : "Natural blue"));
+            Debug.Log("River Rush colors: seed " + seed + ", real people " +
+                      connectedHumanCount + ", mode " +
+                      (FullRandomColors ? "Full random" : "Natural blue") +
+                      ", shared variants " + (palette == null ? 0 : palette.Length));
         }
+
+        private void EnsurePalette(int seed)
+        {
+            bool crowd = FullRandomColors;
+            if (palette != null && activeSeed == seed && activeCrowdMode == crowd) return;
+
+            DisposePalette();
+            Shader shader = Shader.Find("RiverRush/WaterDropletURP");
+            if (shader == null)
+            {
+                Debug.LogError("Missing shader RiverRush/WaterDropletURP; colors cannot update.", this);
+                return;
+            }
+
+            activeSeed = seed;
+            activeCrowdMode = crowd;
+            int count = crowd ? CrowdVariants : NaturalVariants;
+            palette = new Material[count];
+            var rng = new System.Random(unchecked(seed ^ 0x5C7013));
+            float crowdOffset = (float)rng.NextDouble();
+            for (int i = 0; i < count; i++)
+            {
+                float selectedHue = crowd
+                    ? Mathf.Repeat(crowdOffset + i * 0.61803399f, 1f)
+                    : (i == 0 ? 0.515f : 0.49f + 0.11f * (float)rng.NextDouble());
+                float saturation = crowd
+                    ? 0.64f + 0.30f * (float)rng.NextDouble()
+                    : 0.48f + 0.25f * (float)rng.NextDouble();
+                float brightness = crowd
+                    ? 0.84f + 0.16f * (float)rng.NextDouble()
+                    : 0.81f + 0.19f * (float)rng.NextDouble();
+                Material material = new Material(shader)
+                {
+                    name = "RiverRush_" + (crowd ? "Crowd_" : "Natural_") + i
+                };
+                material.SetColor("_BaseTint", Color.HSVToRGB(selectedHue, saturation, brightness));
+                material.SetFloat("_Opacity", i == 0 && !crowd ? dropletOpacity :
+                                   Mathf.Clamp(dropletOpacity - 0.05f, 0.3f, 1f));
+                palette[i] = material;
+            }
+        }
+
+        private void DisposePalette()
+        {
+            if (palette == null) return;
+            foreach (Material material in palette)
+            {
+                if (material == null) continue;
+                if (Application.isPlaying) Destroy(material);
+                else DestroyImmediate(material);
+            }
+            palette = null;
+        }
+
+        private void OnDestroy() => DisposePalette();
 
 #if UNITY_EDITOR
         private void OnValidate()
