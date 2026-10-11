@@ -26,6 +26,8 @@ namespace RiverRush.Editor
             var bootstrap = Object.FindFirstObjectByType<RiverRaceBootstrap>();
             var waves = Object.FindFirstObjectByType<WaterWaveSimulator>();
             var oceanPhysics = Object.FindFirstObjectByType<OceanWaterPhysics>();
+            var tributaries = Object.FindFirstObjectByType<RiverTributaryNetwork>();
+            var nature = Object.FindFirstObjectByType<ProceduralNature>();
             var waterColors = Object.FindFirstObjectByType<RiverColorSystem>();
             var natureSound = Object.FindFirstObjectByType<RiverNatureAudio>();
             var race = Object.FindFirstObjectByType<RiverRaceManager>();
@@ -34,7 +36,8 @@ namespace RiverRush.Editor
             if (terrain == null || route == null || flow == null || water == null
                 || quality == null || runner == null || bootstrap == null || waves == null ||
                 oceanPhysics == null || race == null || bots.Length < 3 ||
-                waterColors == null || natureSound == null)
+                waterColors == null || natureSound == null ||
+                tributaries == null || nature == null)
             {
                 Debug.LogError("Missing components. Use River Rush/Create Prototype Scene first.");
                 return;
@@ -69,6 +72,44 @@ namespace RiverRush.Editor
                     (t - 0.5f) * terrain.WorldSize);
                 if (Mathf.Abs(before[i] - after) > 0.00001f) failures++;
             }
+
+            // Verify branch network geometry is seeded, monotonic and connects
+            // precisely to the main river; all confluences yield a pickup.
+            var layout = terrain.Branches;
+            if (layout == null || layout.Branches.Length < 3 ||
+                !layout.Verify(out string tributaryError))
+                failures++;
+            else
+            {
+                foreach (var branch in layout.Branches)
+                {
+                    Vector2 endpoint = branch.Points[branch.Points.Length - 1];
+                    if (Mathf.Abs(endpoint.x - terrain.RiverCenter(branch.JunctionV)) > 0.1f ||
+                        Mathf.Abs(endpoint.y - (branch.JunctionV - 0.5f) * terrain.WorldSize) > 0.1f)
+                        failures++;
+                    float heightBefore = float.PositiveInfinity;
+                    foreach (var p in branch.Points)
+                    {
+                        float channelHeight = terrain.SampleHeight(p.x, p.y);
+                        if (channelHeight > heightBefore + 0.01f) failures++;
+                        heightBefore = channelHeight;
+                    }
+                }
+            }
+
+            tributaries.Rebuild();
+            nature.Rebuild();
+            if (tributaries.GeneratedWaterMeshCount != tributaries.BranchCount ||
+                tributaries.GeneratedPickupCount != tributaries.BranchCount ||
+                nature.MeshCount < 3 ||
+                nature.TreesCreated < 25 ||
+                nature.RocksCreated < 10 ||
+                nature.ShrubsCreated < 10) failures++;
+            var terrainRenderer = terrain.GetComponent<MeshRenderer>();
+            if (terrainRenderer == null || terrainRenderer.sharedMaterial == null ||
+                terrainRenderer.sharedMaterial.shader == null ||
+                terrainRenderer.sharedMaterial.shader.name != "RiverRush/TerrainBiomeURP")
+                failures++;
 
             // Pass 2: physically directed flow, positive speed, slower near bank.
             waves.Initialize();
