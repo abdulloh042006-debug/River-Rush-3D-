@@ -24,9 +24,26 @@
 - [ ] Saved scene is included in Build Settings automatically for Windows/Android replay.
 
 ## GitHub source-only validation
-- [ ] GitHub Actions > Source Audit (No Unity License) completes successfully on `main`.
+- [ ] GitHub Actions > Source and Procedural World Tests (No Unity License) completes successfully on `main`.
 - [ ] Locally, `python tools/source_audit.py` prints PASS.
-- [ ] Remember: this is not a C# compiler or Unity shader validation.
+- [ ] `dotnet run --project tools/branch-smoke/BranchSmoke.csproj --configuration Release` tests the same C# geometry used by Unity over 2709 configurations.
+- [ ] Remember: the .NET step compiles only Unity-independent branch math, **not** the entire Unity scene or shaders.
+
+## Procedural world, forests and tributaries
+- [ ] Generator creates 5 water-filled subsidiary channels carved into the terrain.
+- [ ] Every branch flows downstream toward +Z and meets the main river centerline.
+- [ ] The river mesh never clips into terrain on bends, narrow channels and water junctions.
+- [ ] Each of the 5 junctions creates exactly one pickup; pickups are collected once.
+- [ ] Picking up tributaries increases water volume, wave impulse and splash audio.
+- [ ] Floating rigidbodies respond to water currents on both tributaries and main river.
+- [ ] Terrain altitude/slope shows grass, forest floor, exposed rock, snow and coastal sand.
+- [ ] Different seeds generate different tree clusters and varied Alpine/valley geography.
+- [ ] Same seed yields identical terrain, branch paths, rock and tree placements.
+- [ ] Trees/rocks/shrubs never block the main race corridor or subsidiary channel geometry.
+- [ ] Forest, detailed forest, boulders and shrubs are combined into <=4 mesh groups.
+- [ ] BatterySaver/Auto lower forest density **visually** by disabling extra mesh layers.
+- [ ] Test at least 20 seeds in Unity for water clipping, smooth joins and scenery distribution.
+- [ ] Profile CPU time of level generation and GPU triangle/draw-call budget on Android.
 
 ## Natural audio and water colors
 - [ ] One human + five AI bots: racers have distinct blue/turquoise/cyan semi-transparent colors.
