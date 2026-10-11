@@ -31,8 +31,16 @@ namespace RiverRush.Gameplay
         public void AddWater(float amount)
         {
             if (amount <= 0f) return;
+            float previous = volume;
             volume = Mathf.Min(maxVolume, volume + amount);
             UpdateVisual();
+            if (volume > previous)
+            {
+                var waves = FindFirstObjectByType<RiverRush.World.WaterWaveSimulator>();
+                var runner = GetComponent<RiverRunner>();
+                if (waves != null && runner != null)
+                    waves.AddImpulse(runner.Progress, Mathf.Min(6f, (volume - previous) * 0.45f), 7f);
+            }
         }
 
         private void UpdateVisual()
