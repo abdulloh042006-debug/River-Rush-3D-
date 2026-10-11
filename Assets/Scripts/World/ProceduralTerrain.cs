@@ -30,6 +30,7 @@ namespace RiverRush.World
         public int Seed => seed;
         public bool RandomizeEachRace => randomizeEachRace;
         public float WorldSize => worldSize;
+        public float MountainHeight => mountainHeight;
         public float RiverWidth => riverWidth;
         public float SeaLevel => seaLevel;
         public RiverBranchLayout Branches { get { EnsureLayout(); return branchLayout; } }
