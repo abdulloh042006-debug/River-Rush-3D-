@@ -21,10 +21,16 @@ namespace RiverRush.Audio
         [SerializeField, Range(0f, 1f)] private float windVolume = 0.22f;
         [SerializeField, Range(0f, 1f)] private float forestVolume = 0.24f;
 
+        [Header("Optional recorded ambience (overrides procedural synthesis)")]
+        [SerializeField] private AudioClip recordedWaterLoop;
+        [SerializeField] private AudioClip recordedWindLoop;
+        [SerializeField] private AudioClip recordedForestLoop;
+        [SerializeField] private AudioClip recordedSplash;
+        private AudioClip splashClip;
+        private AudioClip generatedSplash;
         private AudioSource[] layers;
         private AudioClip[] clips;
         private RiverRunner humanRunner;
-        private RiverFlowField flow;
         private ProceduralTerrain terrain;
         private bool audioEnabled = true;
 
@@ -36,7 +42,6 @@ namespace RiverRush.Audio
             audioEnabled = PlayerPrefs.GetInt("RR_AudioEnabled", 1) == 1;
             masterVolume = Mathf.Clamp01(PlayerPrefs.GetFloat("RR_MasterVolume", masterVolume));
             terrain = FindFirstObjectByType<ProceduralTerrain>();
-            flow = FindFirstObjectByType<RiverFlowField>();
             foreach (var runner in FindObjectsByType<RiverRunner>(FindObjectsSortMode.None))
             {
                 if (!runner.IsHumanControlled) continue;
@@ -59,15 +64,60 @@ namespace RiverRush.Audio
                 source.volume = 0f;
                 source.priority = 100 + layer * 5;
 
-                float[] data = CreateLoop(seed + layer * 3571, layer);
-                var clip = AudioClip.Create("River Rush " + layer, data.Length, 1, sampleRate, false);
-                if (!clip.SetData(data, 0))
-                    Debug.LogError("River Rush: failed to fill generated nature audio clip.", this);
-                source.clip = clip;
+                AudioClip recorded = layer == 0 ? recordedWaterLoop :
+                    layer == 1 ? recordedWindLoop : recordedForestLoop;
+                if (recorded != null)
+                {
+                    source.clip = recorded;
+                }
+                else
+                {
+                    float[] data = CreateLoop(seed + layer * 3571, layer);
+                    var clip = AudioClip.Create("River Rush " + layer, data.Length, 1, sampleRate, false);
+                    if (!clip.SetData(data, 0))
+                        Debug.LogError("River Rush: failed to fill generated nature audio clip.", this);
+                    source.clip = clip;
+                    clips[layer] = clip; // only destroy clips we created ourselves
+                }
                 source.Play();
                 layers[layer] = source;
-                clips[layer] = clip;
             }
+            if (recordedSplash != null) splashClip = recordedSplash;
+            else
+            {
+                generatedSplash = MakeSplashClip(seed ^ 0x3521F);
+                splashClip = generatedSplash;
+            }
+        }
+
+        /// <summary>Water pickup and splash one-shot. Uses current water layer volume.</summary>
+        public void PlaySplash(float intensity = 1f)
+        {
+            if (!audioEnabled || layers == null || layers.Length == 0 ||
+                layers[0] == null || splashClip == null) return;
+            layers[0].PlayOneShot(splashClip, Mathf.Clamp(intensity, 0.2f, 1.3f));
+        }
+
+        private AudioClip MakeSplashClip(int seed)
+        {
+            int length = Mathf.Max(1000, Mathf.RoundToInt(sampleRate * 0.42f));
+            float[] data = new float[length];
+            var random = new System.Random(seed);
+            float low = 0f;
+            for (int i = 0; i < length; i++)
+            {
+                float t = i / (float)sampleRate;
+                float noise = (float)random.NextDouble() * 2f - 1f;
+                low = low * 0.88f + noise * 0.12f;
+                float envelope = (1f - Mathf.Exp(-85f * t)) * Mathf.Exp(-8.5f * t);
+                float bubble = Mathf.Sin(6.2831853f * (270f * t - 120f * t * t));
+                data[i] = Mathf.Clamp((low * 0.65f + noise * 0.14f + bubble * 0.16f)
+                    * envelope * 0.9f, -0.95f, 0.95f);
+            }
+            AudioClip clip = AudioClip.Create("RiverRush Water Splash", length, 1, sampleRate, false);
+            if (!clip.SetData(data, 0))
+                Debug.LogError("Failed to create splash sound clip.", this);
+            return clip;
         }
 
         private float[] CreateLoop(int seed, int layer)
@@ -185,6 +235,11 @@ namespace RiverRush.Audio
 
         private void OnDestroy()
         {
+            if (generatedSplash != null)
+            {
+                if (Application.isPlaying) Destroy(generatedSplash);
+                else DestroyImmediate(generatedSplash);
+            }
             if (layers != null)
             {
                 foreach (var source in layers)
