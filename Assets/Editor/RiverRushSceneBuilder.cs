@@ -175,22 +175,33 @@ namespace RiverRush.Editor
 
         private static Material EnsureMaterial(string path, string shaderName, Color color)
         {
-            var existing = AssetDatabase.LoadAssetAtPath<Material>(path);
-            if (existing != null) return existing;
-            if (!AssetDatabase.IsValidFolder("Assets/Materials"))
-                AssetDatabase.CreateFolder("Assets", "Materials");
             Shader shader = Shader.Find(shaderName);
             if (shader == null)
             {
-                Debug.LogError("Missing shader: " + shaderName + ". Use a Unity 6 Universal 3D (URP) project.");
+                Debug.LogError("Missing shader: " + shaderName +
+                    ". Create a Unity 6 Universal 3D (URP) project.");
                 return null;
             }
-            var material = new Material(shader);
+
+            var material = AssetDatabase.LoadAssetAtPath<Material>(path);
+            if (material == null)
+            {
+                if (!AssetDatabase.IsValidFolder("Assets/Materials"))
+                    AssetDatabase.CreateFolder("Assets", "Materials");
+                material = new Material(shader);
+                AssetDatabase.CreateAsset(material, path);
+            }
+            else if (material.shader != shader)
+            {
+                // Upgrade old opaque Lit materials when reopening an older demo.
+                material.shader = shader;
+            }
+
             if (material.HasProperty("_BaseColor")) material.SetColor("_BaseColor", color);
+            if (material.HasProperty("_BaseTint")) material.SetColor("_BaseTint", color);
             if (material.HasProperty("_ShallowColor")) material.SetColor("_ShallowColor", color);
             if (material.HasProperty("_OceanColor")) material.SetColor("_OceanColor", color);
-            if (material.HasProperty("_BaseTint")) material.SetColor("_BaseTint", color);
-            AssetDatabase.CreateAsset(material, path);
+            EditorUtility.SetDirty(material);
             return material;
         }
     }
