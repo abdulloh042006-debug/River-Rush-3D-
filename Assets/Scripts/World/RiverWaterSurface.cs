@@ -16,6 +16,11 @@ namespace RiverRush.World
         private Mesh generatedMesh;
         private Material runtimeMaterial;
         private MaterialPropertyBlock waterProperties;
+        private WaterWaveSimulator waves;
+        private Vector3[] baseVertices;
+        private Vector3[] displacedVertices;
+        private float nextWaveVisualTime;
+        private float waveRefreshInterval = 1f / 20f;
 
         public void SetDetail(float detail)
         {
@@ -23,10 +28,35 @@ namespace RiverRush.World
             var renderer = GetComponent<MeshRenderer>();
             renderer.GetPropertyBlock(waterProperties);
             waterProperties.SetFloat("_Detail", Mathf.Clamp01(detail));
+            waveRefreshInterval = 1f / Mathf.Lerp(15f, 45f, Mathf.Clamp01(detail));
             renderer.SetPropertyBlock(waterProperties);
         }
 
         private void Start() => Rebuild();
+
+        private void LateUpdate()
+        {
+            if (generatedMesh == null || baseVertices == null) return;
+            if (Time.unscaledTime < nextWaveVisualTime) return;
+            nextWaveVisualTime = Time.unscaledTime + waveRefreshInterval;
+            if (waves == null) waves = FindFirstObjectByType<WaterWaveSimulator>();
+            if (waves == null || waves.Count == 0 || route == null) return;
+
+            int count = route.Points.Count;
+            if (baseVertices.Length != count * 2) return;
+            if (displacedVertices == null || displacedVertices.Length != baseVertices.Length)
+                displacedVertices = new Vector3[baseVertices.Length];
+            for (int i = 0; i < count; i++)
+            {
+                float meters = i / (float)(count - 1) * route.TotalLength;
+                float displacement = waves.GetHeight(meters);
+                displacedVertices[2 * i] = baseVertices[2 * i] + Vector3.up * displacement;
+                displacedVertices[2 * i + 1] = baseVertices[2 * i + 1] + Vector3.up * displacement;
+            }
+            generatedMesh.vertices = displacedVertices;
+            generatedMesh.RecalculateNormals();
+            generatedMesh.RecalculateBounds();
+        }
 
         [ContextMenu("Rebuild Water Surface")]
         public void Rebuild()
@@ -86,7 +116,10 @@ namespace RiverRush.World
                 else DestroyImmediate(generatedMesh);
             }
 
+            baseVertices = vertices;
+            displacedVertices = new Vector3[vertices.Length];
             generatedMesh = new Mesh { name = "River Rush Water Ribbon" };
+            generatedMesh.MarkDynamic();
             generatedMesh.vertices = vertices;
             generatedMesh.uv = uvs;
             generatedMesh.triangles = triangles;
