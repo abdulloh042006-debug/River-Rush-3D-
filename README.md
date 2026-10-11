@@ -6,14 +6,14 @@ Source-code prototype of a 3D river-racing game. A seeded mountain world leads t
 
 ## Features implemented as code
 
-- Reproducible seeded terrain and monotonic downhill river channel.
+- Fresh procedural terrain seed on each new race, with an Inspector toggle to replay a saved seed; monotonic downhill river channel and regenerated pickup positions.
 - World-space physical-distance spline/arc-length, samples and slopes.
 - Flow speed computed from grade, gravity-like acceleration, friction and shore slowdown; turning inertia, bank boundaries and eddies.
 - Dampened 1D physically-inspired surface waves with swimmer and tributary impulse events.
 - Water mesh displaced by actual simulated waves, plus inexpensive URP foam/ripple shader.
-- Dynamic-body buoyancy/current drag and floating-crate test.
+- Dynamic-body buoyancy/current drag in the river and ocean, plus floating-crate test.
 - Water-volume pickups, visible player growth, foam-like wake trail.
-- Opaque stylized ocean and prototype finish state.
+- Opaque stylized ocean with approximate ocean buoyancy/current and prototype finish state.
 - **Android & Windows performance:** Auto/BatterySaver/Balanced/High/Ultra; dynamic URP render scale, shadow/LOD distance, shader detail, wave mesh update rate; FPS modes Auto/30/60/90/120/Native, on-screen FPS counter and quality menu.
 
 This is an **arcade water-physics approximation**, not full 3D computational fluid dynamics. Real branching tributary hydrology, turbulence simulation, wet-ground interaction, physically computed liquid merging, AI and multiplayer remain future work.
