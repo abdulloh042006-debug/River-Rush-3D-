@@ -64,6 +64,8 @@ namespace RiverRush.Gameplay
 
             meters = Mathf.Min(meters + downstreamSpeed * deltaTime, route.TotalLength);
             if (!route.SampleBank(meters, lateral, out Vector3 point)) return;
+            // Keep the droplet riding the same dynamic water height as floating bodies.
+            if (waves != null) point.y += waves.GetHeight(meters);
             transform.position = point;
 
             if (route.Sample(meters, out _, out Vector3 forward, out _))
