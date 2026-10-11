@@ -115,6 +115,10 @@ namespace RiverRush.Graphics
             Application.targetFrameRate = target;
             foreach (var water in FindObjectsByType<RiverWaterSurface>(FindObjectsSortMode.None))
                 water.SetDetail(waterDetails[level]);
+            foreach (var network in FindObjectsByType<RiverTributaryNetwork>(FindObjectsSortMode.None))
+                network.SetDetail(waterDetails[level]);
+            foreach (var nature in FindObjectsByType<ProceduralNature>(FindObjectsSortMode.None))
+                nature.SetDetail(waterDetails[level]);
             Debug.Log("River Rush quality: " + (level + 1) +
                       "/4, target FPS " + target + ", measured ~" + smoothedFps.ToString("F0"));
         }
