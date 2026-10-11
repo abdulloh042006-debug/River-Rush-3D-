@@ -29,7 +29,7 @@ namespace RiverRush.Editor
             if (terrainRenderer.sharedMaterial != null)
             {
                 terrainRenderer.sharedMaterial.SetFloat("_SeaLevel", terrain.SeaLevel);
-                terrainRenderer.sharedMaterial.SetFloat("_MountainHeight", 95f);
+                terrainRenderer.sharedMaterial.SetFloat("_MountainHeight", terrain.MountainHeight);
                 EditorUtility.SetDirty(terrainRenderer.sharedMaterial);
             }
             terrain.Generate();
