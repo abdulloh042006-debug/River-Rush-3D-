@@ -25,7 +25,7 @@ The river water is **animated geometry**, not simulated fluid. Branching physics
 2. In Unity Hub create a **Universal 3D (URP)** project. Do **not** choose Built-in or HDRP: the custom shader is written for URP.
 3. Download/clone this repository. Copy its `Assets/Scripts`, `Assets/Shaders` and `Assets/Editor` folders into your new Unity project's `Assets/` directory. Let Unity import the scripts and shader.
 4. Use **River Rush → Create Prototype Scene** from Unity's top menu.
-5. Open `Assets/Scenes/RiverRushPrototype.unity` (created automatically) and press **Play**.
+5. Use **River Rush → Validate Prototype Geometry** to check channel slope, water mesh and assigned shader. Then open `Assets/Scenes/RiverRushPrototype.unity` and press **Play**.
 6. Windows test: A/D or left/right arrow keys. Android test: drag/hold to the left or right side of the screen. If using the new Input System exclusively, enable **Both** under Player → Active Input Handling before testing this prototype.
 7. Check Console for errors and use the checklist in `docs/PROTOTYPE_TEST_CHECKLIST.md`.
 
