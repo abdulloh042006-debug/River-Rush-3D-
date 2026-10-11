@@ -4,7 +4,8 @@ using RiverRush.Gameplay;
 namespace RiverRush.World
 {
     /// <summary>
-    /// Rebuilds the main route after terrain seed randomization; the branch\n    /// network handles tributaries and pickups separately.
+    /// Rebuilds the main route after terrain seed randomization; the branch
+    /// network handles tributaries and pickups separately.
     /// Leave terrain.RandomizeEachRace=false to replay a saved numeric seed.
     /// </summary>
     [DefaultExecutionOrder(-200)]
