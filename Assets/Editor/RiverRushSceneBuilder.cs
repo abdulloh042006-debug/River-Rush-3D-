@@ -40,6 +40,21 @@ namespace RiverRush.Editor
                 new Color(0.07f, 0.68f, 0.78f));
             river.AddComponent<RiverWaterSurface>().Rebuild();
 
+            // Five upstream tributaries are carved into the terrain and visually
+            // joined to this main river; their confluences replace old fake pickups.
+            var tributaries = world.AddComponent<RiverTributaryNetwork>();
+            tributaries.ConfigureMaterials(riverRenderer.sharedMaterial,
+                EnsureMaterial("Assets/Materials/TributaryPickup.mat",
+                    "RiverRush/WaterDropletURP", new Color(0.24f, 0.83f, 0.96f)));
+            tributaries.Rebuild();
+
+            // Grouped procedural nature meshes instead of one draw object per tree.
+            var environment = world.AddComponent<ProceduralNature>();
+            environment.ConfigureMaterial(EnsureMaterial(
+                "Assets/Materials/Nature.mat", "RiverRush/NatureVertexColorURP",
+                Color.white));
+            environment.Rebuild();
+
             // Large low-cost opaque ocean beginning at the river mouth (positive Z).
             var ocean = GameObject.CreatePrimitive(PrimitiveType.Plane);
             ocean.name = "Ocean";
@@ -104,19 +119,8 @@ namespace RiverRush.Editor
             trail.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
             trail.receiveShadows = false;
 
-            int[] pickupIndexes = { 24, 65, 120, 177, 226 };
-            for (int p = 0; p < pickupIndexes.Length; p++)
-            {
-                if (route.Points == null || pickupIndexes[p] >= route.Points.Count) continue;
-                var pickup = GameObject.CreatePrimitive(PrimitiveType.Sphere);
-                pickup.name = "Tributary Pickup " + (p + 1);
-                pickup.transform.position =
-                    route.transform.TransformPoint(route.Points[pickupIndexes[p]]) + Vector3.up * 0.4f;
-                pickup.transform.localScale = Vector3.one * 2.6f;
-                pickup.GetComponent<SphereCollider>().isTrigger = true;
-                pickup.GetComponent<MeshRenderer>().sharedMaterial = playerRenderer.sharedMaterial;
-                pickup.AddComponent<TributaryPickup>();
-            }
+            // Tributary pickups now come from RiverTributaryNetwork,
+            // at actual confluences (no floating generic pickups).
 
             // Free-floating object demonstrates water drag/buoyancy without full fluid simulation.
             var floater = GameObject.CreatePrimitive(PrimitiveType.Cube);
@@ -170,7 +174,7 @@ namespace RiverRush.Editor
                 EditorBuildSettings.scenes = scenes.ToArray();
             }
             AssetDatabase.SaveAssets();
-            Debug.Log("Created river prototype with water physics, 5 bots, natural blue/translucent racer colors, procedural ambience and FPS settings.");
+            Debug.Log("Created seeded branching river, batched forests and rocks, physics, AI, nature audio and adaptive FPS.");
         }
 
         private static Material EnsureMaterial(string path, string shaderName, Color color)
