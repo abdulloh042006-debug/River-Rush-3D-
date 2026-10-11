@@ -20,9 +20,11 @@ namespace RiverRush.Editor
             var quality = Object.FindFirstObjectByType<AdaptiveQualityController>();
             var runner = Object.FindFirstObjectByType<RiverRunner>();
             var bootstrap = Object.FindFirstObjectByType<RiverRaceBootstrap>();
+            var waves = Object.FindFirstObjectByType<WaterWaveSimulator>();
+            var oceanPhysics = Object.FindFirstObjectByType<OceanWaterPhysics>();
             int failures = 0;
             if (terrain == null || route == null || flow == null || water == null
-                || quality == null || runner == null || bootstrap == null)
+                || quality == null || runner == null || bootstrap == null || waves == null || oceanPhysics == null)
             {
                 Debug.LogError("Missing components. Use River Rush/Create Prototype Scene first.");
                 return;
@@ -59,6 +61,9 @@ namespace RiverRush.Editor
             }
 
             // Pass 2: physically directed flow, positive speed, slower near bank.
+            waves.Initialize();
+            waves.AddImpulse(route.TotalLength * 0.5f, 1.2f, 4f);
+            if (waves.Count != points.Count) failures++;
             float sampleDistance = route.TotalLength * 0.40f;
             bool core = flow.TrySample(sampleDistance, 0f, out Vector3 flowVelocity,
                 out _, out float coreSpeed);
@@ -80,7 +85,8 @@ namespace RiverRush.Editor
                 renderer.sharedMaterial.shader.name != "RiverRush/StylizedRiverURP" ||
                 !renderer.sharedMaterial.shader.isSupported) failures++;
             var ocean = GameObject.Find("Ocean");
-            if (ocean == null || ocean.GetComponent<MeshRenderer>() == null ||
+            if (ocean == null || ocean.GetComponent<OceanWaterPhysics>() == null ||
+                ocean.GetComponent<MeshRenderer>() == null ||
                 ocean.GetComponent<MeshRenderer>().sharedMaterial == null) failures++;
 
             // Pass 4: performance configuration and river physics component presence.
