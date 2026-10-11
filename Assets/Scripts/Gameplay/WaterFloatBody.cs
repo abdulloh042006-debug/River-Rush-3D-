@@ -11,6 +11,7 @@ namespace RiverRush.Gameplay
     public sealed class WaterFloatBody : MonoBehaviour
     {
         [SerializeField] private RiverFlowField river;
+        [SerializeField] private OceanWaterPhysics ocean;
         [SerializeField, Min(0f)] private float liftStrength = 1.5f;
         [SerializeField, Min(0f)] private float dragAcceleration = 4f;
         [SerializeField, Min(0f)] private float maxHorizontalAcceleration = 28f;
@@ -23,14 +24,21 @@ namespace RiverRush.Gameplay
             body = GetComponent<Rigidbody>();
             bodyCollider = GetComponent<Collider>();
             if (river == null) river = FindFirstObjectByType<RiverFlowField>();
+            if (ocean == null) ocean = FindFirstObjectByType<OceanWaterPhysics>();
         }
 
         private void FixedUpdate()
         {
-            if (river == null || body.isKinematic) return;
-            if (!river.ClosestPoint(body.worldCenterOfMass, out float meters,
-                out float lateral, out Vector3 surface)) return;
-            if (!river.TrySample(meters, lateral, out Vector3 current, out _, out _)) return;
+            if (body.isKinematic) return;
+            Vector3 surface = Vector3.zero;
+            Vector3 current = Vector3.zero;
+            bool submergedInRiver = river != null &&
+                river.ClosestPoint(body.worldCenterOfMass, out float meters,
+                    out float lateral, out surface) &&
+                river.TrySample(meters, lateral, out current, out _, out _);
+            bool submergedInOcean = !submergedInRiver && ocean != null &&
+                ocean.TrySample(body.worldCenterOfMass, out surface, out current);
+            if (!submergedInRiver && !submergedInOcean) return;
 
             Bounds bounds = bodyCollider.bounds;
             float depth = surface.y + extraDepth - bounds.min.y;
