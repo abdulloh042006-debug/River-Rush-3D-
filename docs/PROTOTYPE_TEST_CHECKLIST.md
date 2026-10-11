@@ -16,7 +16,17 @@
 - [ ] Pickups trigger exactly once, grow water volume/visual width and add a splash.
 - [ ] Floating cube gets physically lifted and pulled downstream.
 - [ ] Running/steering/bank contact and camera follow work.
-- [ ] Player reaches ocean and finish message appears.
+- [ ] Five AI racers spawn, are colored differently, move only after the countdown and steer independently.
+- [ ] Player's camera follows the human rather than a randomly selected AI bot.
+- [ ] During a race, all racers appear in a correctly ordered leaderboard with distances/progress.
+- [ ] Player reaches the ocean and race manager freezes final placement/time.
+- [ ] "New Random Race" reloads the scene with a new seed (and different river geometry).
+- [ ] Saved scene is included in Build Settings automatically for Windows/Android replay.
+
+## GitHub source-only validation
+- [ ] GitHub Actions > Source Audit (No Unity License) completes successfully on `main`.
+- [ ] Locally, `python tools/source_audit.py` prints PASS.
+- [ ] Remember: this is not a C# compiler or Unity shader validation.
 
 ## Performance / Android
 - [ ] Play on at least one weak and one strong phone; note Android versions and refresh rate.
@@ -39,7 +49,7 @@
 - [ ] Windows EXE has been compiled
 - [ ] Android APK has been compiled
 - [ ] Proper 3D fluid simulation / branching water graph
-- [ ] AI opponents and online multiplayer
+- [ ] Advanced/competitive AI and online multiplayer (simple offline AI bots are source-coded)
 - [ ] Production-quality art and responsive UI
 
 ## Bug report
