@@ -16,6 +16,7 @@ namespace RiverRush.Gameplay
         private float nextSort;
         private bool playerFinished;
         private int finalRank;
+        private float finalTime;
 
         public bool IsRacing => Time.unscaledTime >= startAt && !playerFinished;
         public float RaceTime => Mathf.Max(0f, Time.unscaledTime - startAt);
@@ -61,6 +62,7 @@ namespace RiverRush.Gameplay
                 playerFinished = true;
                 SortStandings();
                 finalRank = PlayerRank;
+                finalTime = RaceTime;
                 Debug.Log("River Rush finished: position " + finalRank + "/" +
                           competitors.Count + " in " + RaceTime.ToString("F2") + " seconds");
             }
