@@ -1,11 +1,10 @@
-using System;
 using UnityEngine;
 using RiverRush.Gameplay;
 
 namespace RiverRush.World
 {
     /// <summary>
-    /// Rebuilds route references and aligns pickups after a newly randomized race seed.
+    /// Rebuilds the main route after terrain seed randomization; the branch\n    /// network handles tributaries and pickups separately.
     /// Leave terrain.RandomizeEachRace=false to replay a saved numeric seed.
     /// </summary>
     [DefaultExecutionOrder(-200)]
@@ -23,16 +22,8 @@ namespace RiverRush.World
             // Terrain already generated at execution order -300, with a new seed.
             route.Rebuild();
 
-            var pickups = FindObjectsByType<TributaryPickup>(FindObjectsSortMode.None);
-            Array.Sort(pickups, (a, b) =>
-                string.CompareOrdinal(a.gameObject.name, b.gameObject.name));
-
-            for (int i = 0; i < pickups.Length; i++)
-            {
-                float t = (i + 1f) / (pickups.Length + 1f);
-                if (route.SampleBank(t * route.TotalLength, 0f, out Vector3 center))
-                    pickups[i].transform.position = center + Vector3.up * 0.4f;
-            }
+            // RiverTributaryNetwork regenerates its own seeded pickups in Start().
+            // Do not relocate old scene pickups to artificial spline intervals.
 
             var floater = FindFirstObjectByType<WaterFloatBody>();
             if (floater != null &&
