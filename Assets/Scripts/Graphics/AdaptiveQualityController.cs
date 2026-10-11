@@ -23,6 +23,7 @@ namespace RiverRush.Graphics
         private readonly float[] renderScales = { 0.70f, 0.82f, 1.0f, 1.12f };
         private readonly float[] shadowDistances = { 12f, 30f, 55f, 85f };
         private readonly float[] waterDetails = { 0.12f, 0.40f, 0.72f, 1.0f };
+        private readonly float[] lodBiases = { 0.6f, 0.85f, 1.2f, 1.65f };
         private UniversalRenderPipelineAsset urp;
         private float originalRenderScale, originalShadowDistance, originalLodBias;
         private int originalVsync, originalFrameRate;
@@ -59,8 +60,13 @@ namespace RiverRush.Graphics
             if (preset != GraphicsPreset.Auto) return (int)preset - 1;
             if (Application.isMobilePlatform)
             {
-                int memory = SystemInfo.graphicsMemorySize;
-                return memory > 3500 ? 2 : memory > 1800 ? 1 : 0;
+                int graphicsMB = SystemInfo.graphicsMemorySize;
+                int systemMB = SystemInfo.systemMemorySize;
+                // Some Android drivers return unknown (0) for dedicated GPU memory.
+                if (systemMB >= 7500 && graphicsMB >= 3000) return 3;
+                if (systemMB >= 5500 && graphicsMB >= 1500) return 2;
+                if (systemMB >= 4500 || graphicsMB >= 1200) return 1;
+                return 0;
             }
             return SystemInfo.graphicsMemorySize >= 6000 ? 3 : 2;
         }
@@ -101,7 +107,7 @@ namespace RiverRush.Graphics
                 urp.renderScale = renderScales[level];
                 urp.shadowDistance = shadowDistances[level];
             }
-            QualitySettings.lodBias = new[] { 0.6f, 0.85f, 1.2f, 1.65f }[level];
+            QualitySettings.lodBias = lodBiases[level];
             // Mobile ignores vSyncCount; on desktop prefer hardware pacing at native rate.
             int target = TargetFPS();
             QualitySettings.vSyncCount = !Application.isMobilePlatform &&
@@ -200,7 +206,7 @@ namespace RiverRush.Graphics
 
             if (showMenu)
             {
-                GUI.Box(new Rect(w - 275, 55, 265, 305), "Graphics & FPS");
+                GUI.Box(new Rect(w - 275, 55, 265, 345), "Graphics & FPS");
                 int y = 89;
                 foreach (GraphicsPreset choice in System.Enum.GetValues(typeof(GraphicsPreset)))
                 {
