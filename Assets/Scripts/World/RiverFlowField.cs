@@ -70,30 +70,40 @@ namespace RiverRush.World
             var points = river != null ? river.Points : null;
             if (points == null || points.Count < 2) return false;
 
+            // Route sample Z values are monotonic. Binary search narrows this from
+            // O(N) per floating object per physics tick to O(log N) + a few segments.
+            Vector3 local = river.transform.InverseTransformPoint(worldPoint);
+            int low = 0, high = points.Count - 1;
+            while (high - low > 1)
+            {
+                int mid = (low + high) / 2;
+                if (points[mid].z <= local.z) low = mid;
+                else high = mid;
+            }
+
             float bestDistanceSquared = float.PositiveInfinity;
-            float traveled = 0f;
-            for (int i = 1; i < points.Count; i++)
+            for (int i = Mathf.Max(1, low - 3); i <= Mathf.Min(points.Count - 1, low + 4); i++)
             {
                 Vector3 a = river.transform.TransformPoint(points[i - 1]);
                 Vector3 b = river.transform.TransformPoint(points[i]);
-                Vector3 ab = b - a;
-                float segmentLengthSq = ab.sqrMagnitude;
-                if (segmentLengthSq < 0.00001f) continue;
-                float t = Mathf.Clamp01(Vector3.Dot(worldPoint - a, ab) / segmentLengthSq);
-                Vector3 nearest = a + ab * t;
-                // Horizontal proximity should decide which river section is closest.
+                Vector2 a2 = new Vector2(a.x, a.z);
+                Vector2 b2 = new Vector2(b.x, b.z);
+                Vector2 delta = b2 - a2;
+                if (delta.sqrMagnitude < 0.00001f) continue;
+                float t = Mathf.Clamp01(Vector2.Dot(new Vector2(worldPoint.x, worldPoint.z) - a2, delta)
+                                      / delta.sqrMagnitude);
+                Vector3 nearest = Vector3.Lerp(a, b, t);
                 Vector2 planar = new Vector2(worldPoint.x - nearest.x, worldPoint.z - nearest.z);
                 float d2 = planar.sqrMagnitude;
                 if (d2 < bestDistanceSquared)
                 {
                     bestDistanceSquared = d2;
-                    meters = traveled + Mathf.Sqrt(segmentLengthSq) * t;
-                    Vector3 horizontal = Vector3.ProjectOnPlane(ab, Vector3.up).normalized;
+                    meters = Mathf.Lerp(river.DistanceAt(i - 1), river.DistanceAt(i), t);
+                    Vector3 horizontal = Vector3.ProjectOnPlane(b - a, Vector3.up).normalized;
                     Vector3 right = Vector3.Cross(Vector3.up, horizontal).normalized;
                     lateral = Vector3.Dot(worldPoint - nearest, right);
                     surfacePoint = nearest + right * lateral;
                 }
-                traveled += Mathf.Sqrt(segmentLengthSq);
             }
             return bestDistanceSquared <= river.Width * river.Width * 0.25f;
         }
