@@ -28,7 +28,16 @@ namespace RiverRush.World
             }
         }
 
+        private WaterWaveSimulator waves;
         public float Depth => waterDepth;
+        private WaterWaveSimulator Waves
+        {
+            get
+            {
+                if (waves == null) waves = GetComponent<WaterWaveSimulator>();
+                return waves;
+            }
+        }
 
         public bool TrySample(float meters, float lateral, out Vector3 velocity,
             out Vector3 surfacePosition, out float flowSpeed)
@@ -57,6 +66,7 @@ namespace RiverRush.World
                          * eddyStrength * (0.25f + shore * 0.75f);
             velocity = forward * flowSpeed + right * eddy;
             surfacePosition = center + right * Mathf.Clamp(lateral, -halfWidth, halfWidth);
+            if (Waves != null) surfacePosition.y += Waves.GetHeight(meters);
             return true;
         }
 
@@ -105,7 +115,9 @@ namespace RiverRush.World
                     surfacePoint = nearest + right * lateral;
                 }
             }
-            return bestDistanceSquared <= river.Width * river.Width * 0.25f;
+            bool inWater = bestDistanceSquared <= river.Width * river.Width * 0.25f;
+            if (inWater && Waves != null) surfacePoint.y += Waves.GetHeight(meters);
+            return inWater;
         }
     }
 }
