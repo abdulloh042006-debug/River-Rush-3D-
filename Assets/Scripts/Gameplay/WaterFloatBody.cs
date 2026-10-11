@@ -12,6 +12,7 @@ namespace RiverRush.Gameplay
     {
         [SerializeField] private RiverFlowField river;
         [SerializeField] private OceanWaterPhysics ocean;
+        [SerializeField] private RiverTributaryNetwork tributaries;
         [SerializeField, Min(0f)] private float liftStrength = 1.5f;
         [SerializeField, Min(0f)] private float dragAcceleration = 4f;
         [SerializeField, Min(0f)] private float maxHorizontalAcceleration = 28f;
@@ -25,6 +26,7 @@ namespace RiverRush.Gameplay
             bodyCollider = GetComponent<Collider>();
             if (river == null) river = FindFirstObjectByType<RiverFlowField>();
             if (ocean == null) ocean = FindFirstObjectByType<OceanWaterPhysics>();
+            if (tributaries == null) tributaries = FindFirstObjectByType<RiverTributaryNetwork>();
         }
 
         private void FixedUpdate()
@@ -36,9 +38,12 @@ namespace RiverRush.Gameplay
                 river.ClosestPoint(body.worldCenterOfMass, out float meters,
                     out float lateral, out surface) &&
                 river.TrySample(meters, lateral, out current, out _, out _);
-            bool submergedInOcean = !submergedInRiver && ocean != null &&
+            bool submergedInTributary = !submergedInRiver && tributaries != null &&
+                tributaries.TrySampleSurface(body.worldCenterOfMass, out surface, out current);
+            bool submergedInOcean = !submergedInRiver && !submergedInTributary &&
+                ocean != null &&
                 ocean.TrySample(body.worldCenterOfMass, out surface, out current);
-            if (!submergedInRiver && !submergedInOcean) return;
+            if (!submergedInRiver && !submergedInTributary && !submergedInOcean) return;
 
             Bounds bounds = bodyCollider.bounds;
             float depth = surface.y + extraDepth - bounds.min.y;
