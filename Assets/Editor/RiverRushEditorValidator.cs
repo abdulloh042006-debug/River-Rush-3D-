@@ -19,9 +19,10 @@ namespace RiverRush.Editor
             var water = Object.FindFirstObjectByType<RiverWaterSurface>();
             var quality = Object.FindFirstObjectByType<AdaptiveQualityController>();
             var runner = Object.FindFirstObjectByType<RiverRunner>();
+            var bootstrap = Object.FindFirstObjectByType<RiverRaceBootstrap>();
             int failures = 0;
             if (terrain == null || route == null || flow == null || water == null
-                || quality == null || runner == null)
+                || quality == null || runner == null || bootstrap == null)
             {
                 Debug.LogError("Missing components. Use River Rush/Create Prototype Scene first.");
                 return;
