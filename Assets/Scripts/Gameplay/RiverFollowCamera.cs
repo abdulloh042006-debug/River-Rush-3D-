@@ -16,8 +16,14 @@ namespace RiverRush.Gameplay
         {
             if (target == null)
             {
-                var runner = FindFirstObjectByType<RiverRunner>();
-                if (runner != null) target = runner.transform;
+                foreach (var runner in FindObjectsByType<RiverRunner>(FindObjectsSortMode.None))
+                {
+                    if (runner.IsHumanControlled)
+                    {
+                        target = runner.transform;
+                        break;
+                    }
+                }
             }
             if (target != null) transform.position = target.position + offset;
         }
