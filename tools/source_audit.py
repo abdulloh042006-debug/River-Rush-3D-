@@ -28,6 +28,9 @@ FILES = {
     "builder": "Assets/Editor/RiverRushSceneBuilder.cs",
     "validator": "Assets/Editor/RiverRushEditorValidator.cs",
     "build_menu": "Assets/Editor/RiverRushBuildMenu.cs",
+    "color": "Assets/Scripts/Graphics/RiverColorSystem.cs",
+    "nature_audio": "Assets/Scripts/Audio/RiverNatureAudio.cs",
+    "droplet_shader": "Assets/Shaders/WaterDropletURP.shader",
     "river_shader": "Assets/Shaders/StylizedRiverURP.shader",
     "ocean_shader": "Assets/Shaders/StylizedOceanURP.shader",
 }
@@ -115,6 +118,15 @@ def main() -> int:
         "Android APK build menu": ("build_menu", "BuildTarget.Android"),
         "foam shader": ("river_shader", "_FoamWidth"),
         "ocean shader": ("ocean_shader", "_OceanColor"),
+        "generated water ambience": ("nature_audio", "CreateLoop("),
+        "generated wind and forest ambience": ("nature_audio", "Mountain Wind"),
+        "persisted audio settings": ("nature_audio", "RR_MasterVolume"),
+        "natural water palette": ("color", "Natural blue"),
+        "real-human count and crowd threshold": ("color", "SetConnectedHumanCount("),
+        "random hues for crowded races": ("color", "FullRandomColors"),
+        "water palette shader": ("droplet_shader", "_BaseTint"),
+        "audio scene integration": ("builder", "AddComponent<RiverNatureAudio>()"),
+        "color scene integration": ("builder", "AddComponent<RiverColorSystem>()"),
     }
     for label, (file_key, marker) in checks.items():
         if marker not in code.get(file_key, ""):
