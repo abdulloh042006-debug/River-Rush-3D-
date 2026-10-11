@@ -18,6 +18,7 @@ namespace RiverRush.World
         [SerializeField, Range(40, 500)] private int treeBudget = 270;
         [SerializeField, Range(20, 450)] private int rockBudget = 180;
         [SerializeField, Range(20, 600)] private int shrubBudget = 240;
+        [SerializeField, Range(20, 500)] private int riverbankReedBudget = 160;
         [SerializeField, Range(4f, 28f)] private float bankClearance = 11f;
 
         private GameObject generatedRoot;
@@ -29,6 +30,7 @@ namespace RiverRush.World
         public int TreesCreated { get; private set; }
         public int RocksCreated { get; private set; }
         public int ShrubsCreated { get; private set; }
+        public int ReedsCreated { get; private set; }
         public int MeshCount => meshes.Count;
 
         public void ConfigureMaterial(Material material) { natureMaterial = material; }
@@ -57,7 +59,7 @@ namespace RiverRush.World
             var rng = new System.Random(unchecked(terrain.Seed ^ 0x7F3D912));
             float size = terrain.WorldSize;
             float half = size * 0.46f;
-            TreesCreated = RocksCreated = ShrubsCreated = 0;
+            TreesCreated = RocksCreated = ShrubsCreated = ReedsCreated = 0;
 
             // Alpine rockfields near the source; forests in sheltered valleys;
             // lush meadow shrubs and small stones toward the estuary.
@@ -146,6 +148,38 @@ namespace RiverRush.World
                 ShrubsCreated++;
             }
 
+            // Add narrow belts of cattails / river reeds. The candidate must be
+            // close to a river but outside its playable water corridor.
+            for (int attempt = 0;
+                 attempt < riverbankReedBudget * 35 && ReedsCreated < riverbankReedBudget;
+                 attempt++)
+            {
+                float x = RandomRange(rng, -half, half);
+                float z = RandomRange(rng, -half, half);
+                float v = z / size + 0.5f;
+                if (v < 0.18f || v > 0.97f) continue;
+                float shoreline = terrain.WaterwayDistance(x, z);
+                float baseBank = terrain.RiverWidth * 0.55f;
+                if (shoreline < baseBank + 2.5f ||
+                    shoreline > baseBank + 8.5f) continue;
+                float slope = Slope(x, z);
+                if (slope > 0.40f) continue;
+                float y = terrain.SampleHeight(x, z);
+                float reedHeight = RandomRange(rng, 0.95f, 2.25f);
+                Vector3 basePoint = new Vector3(x, y - 0.08f, z);
+                Color stem = new Color(RandomRange(rng, 0.23f, 0.39f),
+                    RandomRange(rng, 0.37f, 0.57f), RandomRange(rng, 0.13f, 0.22f));
+                shrubs.AddColumn(basePoint, reedHeight * 0.034f,
+                    reedHeight, stem);
+                if (rng.NextDouble() < 0.40)
+                {
+                    shrubs.AddColumn(basePoint + Vector3.up * (reedHeight * 0.78f),
+                        reedHeight * 0.052f, reedHeight * 0.23f,
+                        new Color(0.36f, 0.25f, 0.14f));
+                }
+                ReedsCreated++;
+            }
+
             if (natureMaterial == null && fallbackMaterial == null)
             {
                 Shader shader = Shader.Find("RiverRush/NatureVertexColorURP");
@@ -161,7 +195,8 @@ namespace RiverRush.World
             SetDetail(currentDetail);
             Debug.Log("River Rush nature seed " + terrain.Seed +
                       ": " + TreesCreated + " trees, " + RocksCreated +
-                      " rocks, " + ShrubsCreated + " shrubs in " + MeshCount +
+                      " rocks, " + ShrubsCreated + " shrubs, " + ReedsCreated +
+                      " river reeds in " + MeshCount +
                       " mesh batches.");
         }
 
