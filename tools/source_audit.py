@@ -125,6 +125,12 @@ def main() -> int:
         "real-human count and crowd threshold": ("color", "SetConnectedHumanCount("),
         "random hues for crowded races": ("color", "FullRandomColors"),
         "water palette shader": ("droplet_shader", "_BaseTint"),
+        "shared palette for large lobbies": ("color", "CrowdVariants = 48"),
+        "offline bots do not count as humans": ("color", "connectedHumanCount"),
+        "licensed ambient override": ("nature_audio", "recordedForestLoop"),
+        "tribuary splash one-shot": ("nature_audio", "PlaySplash("),
+        "water pickup invokes splash": ("growth", "ambience.PlaySplash("),
+        "transparent water shader": ("droplet_shader", "Blend SrcAlpha OneMinusSrcAlpha"),
         "audio scene integration": ("builder", "AddComponent<RiverNatureAudio>()"),
         "color scene integration": ("builder", "AddComponent<RiverColorSystem>()"),
     }
