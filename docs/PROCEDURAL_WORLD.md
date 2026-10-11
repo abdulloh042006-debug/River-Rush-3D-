@@ -27,7 +27,7 @@
 
 - **Alpine headwaters:** more conifer trees, exposed gray rocks and snow-colored high peaks.
 - **Sheltered mid-valleys:** trees of variable heights, green forest flooring and scattered boulders.
-- **Downstream plains:** broadleaf trees, shrubs and riverbank meadows.
+- **Downstream plains:** broadleaf trees, shrubs, riverbank meadows and cattails/reeds beside (not inside) the water.
 - **Coast and mouth:** sandy low terrain; natural blue sea.
 - Flora placement avoids the playable main river and generated tributary channel corridors; no artificial trunk blocks the route.
 
@@ -38,7 +38,8 @@ All plants and stones are simple **stylized low-poly geometry**. They are visual
 - Up to **270 trees**, split into 2 mesh tiers
 - Up to **180 rocks** (octahedron-based low-poly stones)
 - Up to **240 bushes**
-- Real generated counts may be lower due to slope, waterway buffers, biome suitability and bounded candidate attempts.
+- Up to **160 riverbank reeds** (stored in the existing shrubs mesh, not additional draw objects)
+- Real generated counts may be lower due to slope, waterway buffers, biome suitability and bounded candidate attempts. Reeds deliberately grow in a narrow shore belt beyond the main current.
 
 ### Quality and FPS
 
@@ -68,8 +69,9 @@ Physical Rigidbody objects placed on tributaries can experience downward flow an
 4. Compare two runs with the *same* seed (should be identical) and two different seeds (terrain/vegetation should differ).
 5. Verify no river water strips clip through carved terrain or float above banks on tight curves.
 6. Ensure physics objects float on tributaries and the main flow; collecting all five pickups increases player water volume.
-7. Check terrain shader colors: green vegetation, rocky exposed slopes, sandy coast, alpine snow.
-8. Compare FPS, GPU overdraw, CPU generation time and memory on low/mid/high-end Android and Windows systems.
-9. Test a long session and at least 20 different map seeds; capture any protruding geometry or broken junction.
+7. Check cattails/reeds concentrate along the shoreline while the playable river corridor stays open.
+8. Check terrain shader colors: green vegetation, rocky exposed slopes, sandy coast, alpine snow.
+9. Compare FPS, GPU overdraw, CPU generation time and memory on low/mid/high-end Android and Windows systems.
+10. Test a long session and at least 20 different map seeds; capture any protruding geometry or broken junction.
 
 No Unity Editor compilation, real-device build, visual inspection or measured FPS has yet been completed.
