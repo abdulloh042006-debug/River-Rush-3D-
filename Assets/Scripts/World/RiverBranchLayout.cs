@@ -31,43 +31,16 @@ namespace RiverRush.World
         public static RiverBranchLayout Build(int seed, float worldSize,
             float mainRiverWidth, Func<float, float> mainCenter)
         {
-            var random = new System.Random(unchecked(seed ^ 0x45631B2D));
-            const int count = 5;
-            var branches = new Branch[count];
-            for (int i = 0; i < count; i++)
+            var authored = RiverBranchMath.Generate(
+                seed, worldSize, mainRiverWidth, mainCenter);
+            var branches = new Branch[authored.Length];
+            for (int i = 0; i < authored.Length; i++)
             {
-                // Separated confluences avoid all pickups piling into the same spot.
-                float joinV = 0.19f + i * 0.145f +
-                    ((float)random.NextDouble() - 0.5f) * 0.055f;
-                joinV = Mathf.Clamp(joinV, 0.16f, 0.87f);
-                float startV = Mathf.Max(0.02f, joinV -
-                    (0.14f + (float)random.NextDouble() * 0.10f));
-                int side = i % 2 == 0 ? 1 : -1;
-                // 18 samples keep carving costs predictable at 96x96 terrain vertices.
-                const int pointsCount = 18;
-                var points = new Vector2[pointsCount];
-                float displacement = worldSize * (0.17f + 0.045f *
-                    (float)random.NextDouble());
-                float wigglePhase = (float)random.NextDouble() * Mathf.PI * 2f;
-                for (int j = 0; j < pointsCount; j++)
-                {
-                    float t = j / (float)(pointsCount - 1);
-                    float v = Mathf.Lerp(startV, joinV, t);
-                    float fade = 1f - Mathf.SmoothStep(0f, 1f, t);
-                    float x = mainCenter(v) + side * displacement * fade;
-                    x += Mathf.Sin(t * 12f + wigglePhase) *
-                         displacement * 0.09f * fade * Mathf.Sin(t * Mathf.PI);
-                    // Never exceed the half-map boundary, even at sharp bends.
-                    x = Mathf.Clamp(x, -worldSize * 0.46f, worldSize * 0.46f);
-                    float z = (v - 0.5f) * worldSize;
-                    points[j] = new Vector2(x, z);
-                }
-                // At the confluence the tributary joins the exact main centerline.
-                points[pointsCount - 1] =
-                    new Vector2(mainCenter(joinV), (joinV - 0.5f) * worldSize);
-                branches[i] = new Branch(points, joinV,
-                    Mathf.Max(2.5f, mainRiverWidth * (0.44f + 0.12f *
-                    (float)random.NextDouble())), side);
+                var from = authored[i];
+                var coordinates = new Vector2[from.Points.Length];
+                for (int j = 0; j < coordinates.Length; j++)
+                    coordinates[j] = new Vector2(from.Points[j].X, from.Points[j].Z);
+                branches[i] = new Branch(coordinates, from.JunctionV, from.Width, from.Side);
             }
             return new RiverBranchLayout(branches);
         }
