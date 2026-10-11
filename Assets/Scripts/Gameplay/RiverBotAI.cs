@@ -19,7 +19,7 @@ namespace RiverRush.Gameplay
         private RiverRunner[] rivals;
         private float targetLane;
         private float nextDecision;
-        private int botNumber;
+        [SerializeField] private int botNumber = 1;
 
         public void Configure(int number, int raceSeed)
         {
@@ -32,7 +32,7 @@ namespace RiverRush.Gameplay
             runner = GetComponent<RiverRunner>();
             route = FindFirstObjectByType<RiverRoute>();
             if (random == null)
-                Configure(botNumber + 1, route != null && route.Terrain != null
+                Configure(Mathf.Max(1, botNumber), route != null && route.Terrain != null
                     ? route.Terrain.Seed : 2391);
             rivals = FindObjectsByType<RiverRunner>(FindObjectsSortMode.None);
             DecideLane();
