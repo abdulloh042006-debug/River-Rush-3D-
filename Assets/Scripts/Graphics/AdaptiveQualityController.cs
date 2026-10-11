@@ -6,7 +6,7 @@ using RiverRush.World;
 namespace RiverRush.Graphics
 {
     public enum GraphicsPreset { Auto, BatterySaver, Balanced, High, Ultra }
-    public enum FrameCap { Auto, FPS30, FPS60, FPS90, FPS120 }
+    public enum FrameCap { Auto, FPS30, FPS60, FPS90, FPS120, Native }
 
     /// <summary>
     /// Platform-aware graphics and frame pacing. Supports optional auto down/up-scaling
@@ -50,7 +50,7 @@ namespace RiverRush.Graphics
                 originalShadowDistance = urp.shadowDistance;
             }
             preset = (GraphicsPreset)Mathf.Clamp(PlayerPrefs.GetInt("RR_GraphicsPreset", (int)preset), 0, 4);
-            frameCap = (FrameCap)Mathf.Clamp(PlayerPrefs.GetInt("RR_FrameCap", (int)frameCap), 0, 4);
+            frameCap = (FrameCap)Mathf.Clamp(PlayerPrefs.GetInt("RR_FrameCap", (int)frameCap), 0, 5);
             level = InitialLevel();
             ApplySettings();
         }
@@ -79,7 +79,7 @@ namespace RiverRush.Graphics
 
         private int TargetFPS()
         {
-            int request = frameCap == FrameCap.Auto
+            int request = frameCap == FrameCap.Native ? DisplayRefreshRate() : frameCap == FrameCap.Auto
                 ? (level == 0 ? 30 : level == 1 ? 60 : level == 2 ? 90 : 120)
                 : (int)frameCap == 1 ? 30 : (int)frameCap == 2 ? 60
                 : (int)frameCap == 3 ? 90 : 120;
@@ -222,7 +222,7 @@ namespace RiverRush.Graphics
                         y + ((int)cap / 3) * 38, 78, 34),
                         (cap == frameCap ? "●" : "") + (cap == FrameCap.Auto
                         ? "Auto" : ((int)cap == 1 ? "30" : (int)cap == 2 ? "60" :
-                        (int)cap == 3 ? "90" : "120"))))
+                        (int)cap == 3 ? "90" : (int)cap == 4 ? "120" : "Native"))))
                         SelectFrameCap(cap);
                 }
             }
