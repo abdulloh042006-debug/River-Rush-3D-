@@ -31,6 +31,10 @@ APK or EXE, and there is not yet a fully initialized Unity project.**
    keys. Test camera, waves, floating crate, pickups, bots, rank and ocean finish.
 5. Click **NEW RANDOM RACE** to reload with a fresh procedural seed.
 6. Test 30/60/90/120/Native frame caps and the graphics quality settings.
+7. Tap **Benchmark** in the top-right panel or press **F5** to run a 60-second
+   local measurement. The game shows average FPS, 1% low FPS, worst frame time
+   and Unity-allocated memory. It writes CSV to `Application.persistentDataPath`
+   (an app-private folder on Android); it does not upload results.
 
 ## 3. Build Windows EXE
 
@@ -62,7 +66,10 @@ Unity project or validate rendered meshes and shaders.
 
 - Unity Editor compile / shader import test.
 - Fix any compiler errors (record exact messages).
-- Device FPS/performance and 15-minute temperature tests.
+- Device FPS/performance and 15-minute temperature tests. On each platform run
+  the built-in FPS benchmark at BatterySaver, Balanced, High and Ultra, and
+  compare average/1% low FPS. The report code is ready; **real results are
+  not available yet**.
 - Art/audio/menus, deeper AI balancing and user experience polish.
 - Branching river-network generation, real-time networking and monetization are not built.
 
