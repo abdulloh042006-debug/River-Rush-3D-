@@ -68,15 +68,11 @@ namespace RiverRush.Graphics
                 if (systemMB >= 4500 || graphicsMB >= 1200) return 1;
                 return 0;
             }
-            // Desktop machines can have a Ryzen 7 CPU but only 8 GB RAM
-            // and integrated/shared-memory graphics. Start those on Balanced,
-            // then let real measured FPS decide whether to go higher.
-            int desktopSystemMB = SystemInfo.systemMemorySize;
-            int desktopGraphicsMB = SystemInfo.graphicsMemorySize;
-            if (desktopSystemMB > 0 && desktopSystemMB <= 9000) return 1;
-            if (desktopGraphicsMB > 0 && desktopGraphicsMB <= 1500) return 1;
-            if (desktopSystemMB >= 16000 && desktopGraphicsMB >= 7500) return 3;
-            return 2;
+            // Total RAM is not video memory. A 32 GB Ryzen with an integrated
+            // GPU should start lower than a 32 GB gaming laptop with RTX/RX.
+            return HardwareQualityPolicy.ChooseDesktopLevel(
+                SystemInfo.systemMemorySize, SystemInfo.graphicsMemorySize,
+                SystemInfo.graphicsDeviceName);
         }
 
         private int DisplayRefreshRate()
@@ -128,7 +124,8 @@ namespace RiverRush.Graphics
             foreach (var nature in FindObjectsByType<ProceduralNature>(FindObjectsSortMode.None))
                 nature.SetDetail(waterDetails[level]);
             Debug.Log("River Rush quality: " + (level + 1) +
-                      "/4, target FPS " + target + ", measured ~" + smoothedFps.ToString("F0"));
+                      "/4, target FPS " + target + ", measured ~" + smoothedFps.ToString("F0") +
+                      ", GPU: " + SystemInfo.graphicsDeviceName);
         }
 
         private void Update()
