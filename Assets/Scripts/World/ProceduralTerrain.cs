@@ -45,6 +45,16 @@ namespace RiverRush.World
             PlayerPrefs.Save();
         }
 
+        /// <summary>Guarantees a different next seed even in fixed-seed inspector mode.</summary>
+        public static void QueueNewRandomSeed(int previousSeed)
+        {
+            int nextSeed = unchecked((int)(System.DateTime.UtcNow.Ticks ^
+                                          System.Environment.TickCount));
+            if (nextSeed == previousSeed)
+                nextSeed = unchecked(previousSeed + 1);
+            QueueExactSeedForNextRace(nextSeed);
+        }
+
         public static int LastPlayedSeed =>
             PlayerPrefs.GetInt(LastRaceSeedKey, 12345);
 
