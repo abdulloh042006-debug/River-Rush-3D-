@@ -104,6 +104,11 @@ def main() -> int:
 
     checks = {
         "random-seed terrain": ("terrain", "randomizeEachRace"),
+        "one-shot replay seed persistence": ("terrain", "RR_PendingReplaySeed"),
+        "new seed always differs": ("terrain", "QueueNewRandomSeed("),
+        "same-map QA replay": ("race", "QueueExactSeedForNextRace(terrain.Seed)"),
+        "new random scene from any seed mode": ("race", "QueueNewRandomSeed(terrain.Seed)"),
+        "seed shown on race HUD": ("race", "SEED: "),
         "terrain carves tributaries": ("terrain", "DistanceToBranch(location, branch)"),
         "tributary geometry is seeded": ("branches_math", "new Random("),
         "tributaries join main river": ("branches_math", "mainCenter(joinV)"),
