@@ -101,6 +101,21 @@ namespace RiverRush.Editor
 
             tributaries.Rebuild();
             nature.Rebuild();
+
+            // Repeat generation to catch stale serialized children and duplicated
+            // scene roots that otherwise double GPU memory on 8 GB laptops.
+            tributaries.Rebuild();
+            nature.Rebuild();
+            int natureRootCount = 0, tributaryRootCount = 0;
+            for (int childIndex = 0; childIndex < terrain.transform.childCount; childIndex++)
+            {
+                string childName = terrain.transform.GetChild(childIndex).name;
+                if (childName.StartsWith("Generated Forests, Rocks and Biomes",
+                    System.StringComparison.Ordinal)) natureRootCount++;
+                if (childName.StartsWith("Generated Tributaries - Seed ",
+                    System.StringComparison.Ordinal)) tributaryRootCount++;
+            }
+            if (natureRootCount != 1 || tributaryRootCount != 1) failures++;
             if (tributaries.GeneratedWaterMeshCount != tributaries.BranchCount ||
                 tributaries.GeneratedPickupCount != tributaries.BranchCount ||
                 nature.MeshCount < 3 ||
