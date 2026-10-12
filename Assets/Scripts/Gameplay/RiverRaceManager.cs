@@ -100,8 +100,11 @@ namespace RiverRush.Gameplay
                 Debug.LogError("Prototype scene must be added to Build Profiles before replay.");
                 return;
             }
-            if (repeatMap && terrain != null)
-                ProceduralTerrain.QueueExactSeedForNextRace(terrain.Seed);
+            if (terrain != null)
+            {
+                if (repeatMap) ProceduralTerrain.QueueExactSeedForNextRace(terrain.Seed);
+                else ProceduralTerrain.QueueNewRandomSeed(terrain.Seed);
+            }
             SceneManager.LoadScene(scene.buildIndex);
         }
 
