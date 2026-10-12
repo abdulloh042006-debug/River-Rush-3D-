@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using RiverRush.World;
 
 namespace RiverRush.Gameplay
 {
@@ -12,6 +13,7 @@ namespace RiverRush.Gameplay
         private readonly List<RiverRunner> competitors = new List<RiverRunner>(8);
         private readonly Dictionary<RiverRunner, float> finishTimes = new Dictionary<RiverRunner, float>();
         private RiverRunner player;
+        private ProceduralTerrain terrain;
         private float startAt;
         private float nextSort;
         private bool playerFinished;
@@ -31,6 +33,7 @@ namespace RiverRush.Gameplay
 
         private void Start()
         {
+            terrain = FindFirstObjectByType<ProceduralTerrain>();
             var found = FindObjectsByType<RiverRunner>(FindObjectsSortMode.None);
             foreach (var runner in found)
             {
@@ -88,6 +91,20 @@ namespace RiverRush.Gameplay
             });
         }
 
+        /// <summary>Reloads a fresh map or the exact map seed for repeatable QA.</summary>
+        private void RestartRace(bool repeatMap)
+        {
+            Scene scene = SceneManager.GetActiveScene();
+            if (scene.buildIndex < 0)
+            {
+                Debug.LogError("Prototype scene must be added to Build Profiles before replay.");
+                return;
+            }
+            if (repeatMap && terrain != null)
+                ProceduralTerrain.QueueExactSeedForNextRace(terrain.Seed);
+            SceneManager.LoadScene(scene.buildIndex);
+        }
+
         private void OnGUI()
         {
             if (player == null) return;
@@ -97,22 +114,22 @@ namespace RiverRush.Gameplay
             float w = Screen.width / scale;
             float h = Screen.height / scale;
 
-            GUI.Box(new Rect(8, 48, 235, 73),
-                "TIME: " + (playerFinished ? finalTime : RaceTime).ToString("F1") + "s  |  POSITION: " +
+            GUI.Box(new Rect(8, 48, 235, 92),
+                "SEED: " + (terrain != null ? terrain.Seed.ToString() : "unknown") + "\nTIME: " + (playerFinished ? finalTime : RaceTime).ToString("F1") + "s  |  POSITION: " +
                 (playerFinished ? finalRank : PlayerRank) + "/" + competitors.Count +
                 "\nDISTANCE: " + Mathf.RoundToInt(player.NormalizedProgress * 100f) + "%");
 
             if (showLeaderboard)
             {
                 int count = Mathf.Min(competitors.Count, 8);
-                GUI.Box(new Rect(8, 127, 235, 25 + count * 26), "LEADERBOARD");
+                GUI.Box(new Rect(8, 146, 235, 25 + count * 26), "LEADERBOARD");
                 for (int i = 0; i < count; i++)
                 {
                     RiverRunner racer = competitors[i];
                     if (racer == null) continue;
                     string label = (i + 1) + ". " + (racer == player ? "YOU" : racer.name) +
                                    "  " + Mathf.RoundToInt(racer.NormalizedProgress * 100f) + "%";
-                    GUI.Label(new Rect(20, 152 + i * 26, 212, 24), label);
+                    GUI.Label(new Rect(20, 171 + i * 26, 212, 24), label);
                 }
             }
 
@@ -126,13 +143,12 @@ namespace RiverRush.Gameplay
                 GUI.Box(new Rect(w * 0.5f - 160, h * 0.19f, 320, 130),
                     "OCEAN REACHED!\nPLACE: " + finalRank + "/" + competitors.Count +
                     "\nTIME: " + finalTime.ToString("F1") + "s");
-                if (GUI.Button(new Rect(w * 0.5f - 100, h * 0.19f + 138, 200, 54),
+                if (GUI.Button(new Rect(w * 0.5f - 195, h * 0.19f + 138, 190, 54),
                     "NEW RANDOM RACE"))
-                {
-                    Scene active = SceneManager.GetActiveScene();
-                    if (active.buildIndex >= 0) SceneManager.LoadScene(active.buildIndex);
-                    else Debug.LogError("Add the prototype scene to Build Settings to enable replay.");
-                }
+                    RestartRace(false);
+                if (GUI.Button(new Rect(w * 0.5f + 5, h * 0.19f + 138, 190, 54),
+                    "RETRY SAME MAP"))
+                    RestartRace(true);
             }
 
             GUI.matrix = previous;
