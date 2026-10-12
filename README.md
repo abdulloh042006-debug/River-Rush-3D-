@@ -6,7 +6,7 @@ Source-code prototype of a 3D river-racing game. A seeded mountain world leads t
 
 ## Features implemented as code
 
-- Fresh procedural terrain seed on each new race, with an Inspector toggle to replay a saved seed; mountains, valleys and a monotonic downhill main river.
+- Fresh procedural terrain seed on each new race; mountains, valleys and a monotonic downhill main river. The race HUD displays the seed, and the finish screen can **retry the same map** or request a guaranteed different seed for **New Random Race**. Useful for reproducible bug reports.
 - **Five generated tributaries** carved into the same terrain mesh with branching 3D water ribbons and confluence pickups; branch floating bodies receive buoyancy and current drag.
 - **Procedural nature** with seeded low-poly conifers, broadleaf trees, rocks, alpine boulders, meadow shrubs and freshwater riverbank reeds, combined into four mesh batches (not hundreds of separate draw objects).
 - **Terrain biomes** shaded by elevation and slope: sand, green forests, rocky hills and snowy mountain peaks.
@@ -24,6 +24,7 @@ Source-code prototype of a 3D river-racing game. A seeded mountain world leads t
 - A license-free GitHub Actions source audit (Python). This checks source structure and key dependency markers, **not** a Unity build.
 - Editor menu shortcuts to build **Windows x64 EXE** or **Android APK** once a Unity installation is available. No binary has yet been generated.
 - **Android & Windows performance:** Auto/BatterySaver/Balanced/High/Ultra; dynamic URP render scale, shadow/LOD distance, shader detail, wave mesh update rate; FPS modes Auto/30/60/90/120/Native, on-screen FPS counter and quality menu.
+- **Offline performance diagnostics:** press **F5** / tap **Benchmark** to capture a 60-second FPS run. The game records mean FPS, 1% low, worst frame time and Unity memory to a local CSV; no online telemetry or unverified performance claims.
 
 This is an **arcade water-physics approximation**, not full 3D computational fluid dynamics. Real branching tributary hydrology, turbulence simulation, wet-ground interaction, physically computed liquid merging, advanced AI and online multiplayer remain future work.
 
