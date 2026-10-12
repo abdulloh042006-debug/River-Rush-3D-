@@ -35,11 +35,37 @@ namespace RiverRush.World
         public float SeaLevel => seaLevel;
         public RiverBranchLayout Branches { get { EnsureLayout(); return branchLayout; } }
 
+        private const string PendingReplaySeedKey = "RR_PendingReplaySeed";
+        private const string LastRaceSeedKey = "RR_LastRaceSeed";
+
+        /// <summary>Schedules one exact seed for the next loaded scene, for bug reproduction.</summary>
+        public static void QueueExactSeedForNextRace(int requestedSeed)
+        {
+            PlayerPrefs.SetInt(PendingReplaySeedKey, requestedSeed);
+            PlayerPrefs.Save();
+        }
+
+        public static int LastPlayedSeed =>
+            PlayerPrefs.GetInt(LastRaceSeedKey, 12345);
+
         private void Awake()
         {
-            if (Application.isPlaying && randomizeEachRace)
-                seed = unchecked((int)(System.DateTime.UtcNow.Ticks ^
-                                       System.Environment.TickCount));
+            if (Application.isPlaying)
+            {
+                if (PlayerPrefs.HasKey(PendingReplaySeedKey))
+                {
+                    // Consume exactly once. The next ordinary restart gets a fresh map.
+                    seed = PlayerPrefs.GetInt(PendingReplaySeedKey);
+                    PlayerPrefs.DeleteKey(PendingReplaySeedKey);
+                }
+                else if (randomizeEachRace)
+                {
+                    seed = unchecked((int)(System.DateTime.UtcNow.Ticks ^
+                                           System.Environment.TickCount));
+                }
+                PlayerPrefs.SetInt(LastRaceSeedKey, seed);
+                PlayerPrefs.Save();
+            }
             Generate();
         }
 
