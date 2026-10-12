@@ -1,6 +1,7 @@
 #if UNITY_EDITOR
 using RiverRush.Gameplay;
 using RiverRush.Graphics;
+using RiverRush.Diagnostics;
 using RiverRush.Audio;
 using RiverRush.World;
 using UnityEditor;
@@ -168,6 +169,10 @@ namespace RiverRush.Editor
 
             var settings = new GameObject("Performance & FPS");
             settings.AddComponent<AdaptiveQualityController>();
+
+            // Local-only diagnostics: 60-second benchmark and CSV. No uploads.
+            var benchmark = new GameObject("FPS Benchmark and Device Diagnostics");
+            benchmark.AddComponent<RiverPerformanceBenchmark>();
 
             if (!AssetDatabase.IsValidFolder("Assets/Scenes"))
                 AssetDatabase.CreateFolder("Assets", "Scenes");
