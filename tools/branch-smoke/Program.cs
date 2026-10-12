@@ -79,3 +79,4 @@ Check(observedVariation, "Different seeds produce the same world");
 Console.WriteLine($"PASS: {worlds} seeded worlds, {tributaries} tributaries, " +
                   $"{points} sample points tested with real RiverBranchMath.cs");
 Console.WriteLine("NOTE: Unity terrain meshes, shaders and Android FPS still require Unity/device tests.");
+HardwareQualityTests.Run();
