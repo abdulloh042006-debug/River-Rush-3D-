@@ -9,5 +9,7 @@
   <ItemGroup>
     <Compile Include="../../Assets/Scripts/World/RiverBranchMath.cs"
              Link="RiverBranchMath.cs" />
+    <Compile Include="../../Assets/Scripts/Graphics/HardwareQualityPolicy.cs"
+             Link="HardwareQualityPolicy.cs" />
   </ItemGroup>
 </Project>
