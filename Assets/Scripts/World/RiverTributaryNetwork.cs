@@ -228,13 +228,21 @@ namespace RiverRush.World
 
         private void ClearGenerated()
         {
-            if (generatedRoot != null)
+            // Unity does not serialize generatedRoot (a private runtime reference).
+            // Generated children, however, can be saved with an Editor-built scene.
+            // Remove both those stale children and the current runtime root so
+            // reloading a random race never doubles meshes and draw calls.
+            for (int i = transform.childCount - 1; i >= 0; i--)
             {
-                generatedRoot.SetActive(false);
-                if (Application.isPlaying) Destroy(generatedRoot);
-                else DestroyImmediate(generatedRoot);
-                generatedRoot = null;
+                GameObject child = transform.GetChild(i).gameObject;
+                if (!child.name.StartsWith("Generated Tributaries - Seed ",
+                    System.StringComparison.Ordinal))
+                    continue;
+                child.SetActive(false);
+                if (Application.isPlaying) Destroy(child);
+                else DestroyImmediate(child);
             }
+            generatedRoot = null;
             foreach (var mesh in generatedMeshes)
             {
                 if (mesh == null) continue;
