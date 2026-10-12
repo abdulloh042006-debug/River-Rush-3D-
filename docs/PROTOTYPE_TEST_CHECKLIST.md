@@ -21,6 +21,9 @@
 - [ ] During a race, all racers appear in a correctly ordered leaderboard with distances/progress.
 - [ ] Player reaches the ocean and race manager freezes final placement/time.
 - [ ] "New Random Race" reloads the scene with a new seed (and different river geometry).
+- [ ] "Retry Same Map" reloads the exact previous seed, reproducing branch paths, trees, rocks and water color palette.
+- [ ] With Inspector `Randomize Each Race` disabled, pressing New Random Race still changes the seed.
+- [ ] HUD displays current seed, useful for bug reports and map replay.
 - [ ] Saved scene is included in Build Settings automatically for Windows/Android replay.
 
 ## GitHub source-only validation
@@ -66,6 +69,10 @@
 - [ ] Check GPU overdraw from transparent river and CPU time spent updating wave mesh.
 - [ ] Confirm APK touch steering, aspect ratios and resuming after app backgrounding.
 - [ ] Record average and 1%-low FPS, temperature trends and memory usage.
+- [ ] Use the Benchmark button (or F5 on Windows): after 60 s, confirm average FPS, 1% low, worst frame time and Unity memory appear.
+- [ ] Verify the CSV report is saved **locally** and includes seed, platform, resolution, graphics level and FPS cap.
+- [ ] Pause/background the app during benchmark: status must be INVALID_PAUSED_OR_STALLED rather than claiming a valid result.
+- [ ] Benchmark low/mid/high graphic settings under comparable camera/route conditions; real GPU/thermal profiles still required.
 
 ## Windows
 - [ ] Test standalone x64 EXE at 1080p and 1440p, on both integrated and dedicated GPU.
