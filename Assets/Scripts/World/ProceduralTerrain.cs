@@ -154,10 +154,14 @@ namespace RiverRush.World
             Vector2 location = new Vector2(x, z);
             foreach (var branch in branchLayout.Branches)
             {
+                float influence = branch.Width * 1.4f;
+                // Most terrain vertices are far from the five tributaries.
+                // Cull against precomputed boxes before costly closest-segment checks.
+                if (branch.IsOutsideInfluence(x, z, influence)) continue;
                 float distance = branchLayout.DistanceToBranch(location, branch);
-                if (distance >= branch.Width * 1.4f) continue;
+                if (distance >= influence) continue;
                 float tributaryMask = 1f - Mathf.SmoothStep(branch.Width * 0.35f,
-                                                            branch.Width * 1.4f, distance);
+                                                            influence, distance);
                 mask = Mathf.Max(mask, tributaryMask);
             }
             return Mathf.Lerp(terrainHeight, RiverBedAt(v), mask);
