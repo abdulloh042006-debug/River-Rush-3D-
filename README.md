@@ -43,6 +43,7 @@ This is an **arcade water-physics approximation**, not full 3D computational flu
 ## Documents
 
 - [New laptop setup / APK + EXE build guide](docs/NEW_LAPTOP_SETUP.md)
+- [Ryzen 7 + 8 GB RAM laptop optimization](docs/8GB_RYZEN_LAPTOP.md)
 - [Nature sound and water color system](docs/AUDIO_AND_COLORS.md)
 - [Procedural forest, mountain, rocks & tributaries](docs/PROCEDURAL_WORLD.md)
 - [Water physics + FPS tiers](docs/WATER_AND_FPS.md)
