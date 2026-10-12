@@ -68,7 +68,15 @@ namespace RiverRush.Graphics
                 if (systemMB >= 4500 || graphicsMB >= 1200) return 1;
                 return 0;
             }
-            return SystemInfo.graphicsMemorySize >= 6000 ? 3 : 2;
+            // Desktop machines can have a Ryzen 7 CPU but only 8 GB RAM
+            // and integrated/shared-memory graphics. Start those on Balanced,
+            // then let real measured FPS decide whether to go higher.
+            int desktopSystemMB = SystemInfo.systemMemorySize;
+            int desktopGraphicsMB = SystemInfo.graphicsMemorySize;
+            if (desktopSystemMB > 0 && desktopSystemMB <= 9000) return 1;
+            if (desktopGraphicsMB > 0 && desktopGraphicsMB <= 1500) return 1;
+            if (desktopSystemMB >= 16000 && desktopGraphicsMB >= 7500) return 3;
+            return 2;
         }
 
         private int DisplayRefreshRate()
