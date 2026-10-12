@@ -23,7 +23,7 @@ Source-code prototype of a 3D river-racing game. A seeded mountain world leads t
 - **Graphics:** shares 12 natural or 48 crowd variant droplet materials to reduce rendering cost as player counts grow; seeded river/ocean colors always stay natural.
 - A license-free GitHub Actions source audit (Python). This checks source structure and key dependency markers, **not** a Unity build.
 - Editor menu shortcuts to build **Windows x64 EXE** or **Android APK** once a Unity installation is available. No binary has yet been generated.
-- **Android & Windows performance:** Auto/BatterySaver/Balanced/High/Ultra; dynamic URP render scale, shadow/LOD distance, shader detail, wave mesh update rate; FPS modes Auto/30/60/90/120/Native, on-screen FPS counter and quality menu.
+- **Android & Windows performance:** Auto/BatterySaver/Balanced/High/Ultra; conservative GPU-aware starting preset (32 GB integrated graphics is not mistaken for a dedicated GPU), dynamic URP render scale, shadow/LOD distance, shader detail, wave mesh update rate; FPS modes Auto/30/60/90/120/Native, on-screen FPS counter and quality menu.
 - **Offline performance diagnostics:** press **F5** / tap **Benchmark** to capture a 60-second FPS run. The game records mean FPS, 1% low, worst frame time and Unity memory to a local CSV; no online telemetry or unverified performance claims.
 
 This is an **arcade water-physics approximation**, not full 3D computational fluid dynamics. Real branching tributary hydrology, turbulence simulation, wet-ground interaction, physically computed liquid merging, advanced AI and online multiplayer remain future work.
@@ -43,7 +43,9 @@ This is an **arcade water-physics approximation**, not full 3D computational flu
 ## Documents
 
 - [New laptop setup / APK + EXE build guide](docs/NEW_LAPTOP_SETUP.md)
+- [32 GB laptop setup, CPU/GPU check and graphics tiers](docs/32GB_LAPTOP_SETUP.md)
 - [Ryzen 7 + 8 GB RAM laptop optimization](docs/8GB_RYZEN_LAPTOP.md)
+- [Read-only Windows CPU/GPU/RAM inspection script](tools/check-laptop.ps1)
 - [Nature sound and water color system](docs/AUDIO_AND_COLORS.md)
 - [Procedural forest, mountain, rocks & tributaries](docs/PROCEDURAL_WORLD.md)
 - [Water physics + FPS tiers](docs/WATER_AND_FPS.md)
