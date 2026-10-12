@@ -15,6 +15,10 @@ namespace RiverRush.World
             public readonly float JunctionV;
             public readonly float Width;
             public readonly int Side;
+            public readonly float MinX;
+            public readonly float MaxX;
+            public readonly float MinZ;
+            public readonly float MaxZ;
 
             public Branch(Vector2[] points, float junctionV, float width, int side)
             {
@@ -22,6 +26,25 @@ namespace RiverRush.World
                 JunctionV = junctionV;
                 Width = width;
                 Side = side;
+                float minX = float.PositiveInfinity, maxX = float.NegativeInfinity;
+                float minZ = float.PositiveInfinity, maxZ = float.NegativeInfinity;
+                foreach (var point in points)
+                {
+                    minX = Mathf.Min(minX, point.x);
+                    maxX = Mathf.Max(maxX, point.x);
+                    minZ = Mathf.Min(minZ, point.y);
+                    maxZ = Mathf.Max(maxZ, point.y);
+                }
+                MinX = minX;
+                MaxX = maxX;
+                MinZ = minZ;
+                MaxZ = maxZ;
+            }
+
+            public bool IsOutsideInfluence(float x, float z, float padding)
+            {
+                return x < MinX - padding || x > MaxX + padding ||
+                       z < MinZ - padding || z > MaxZ + padding;
             }
         }
 
