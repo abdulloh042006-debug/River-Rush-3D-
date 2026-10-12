@@ -2,6 +2,7 @@
 using RiverRush.Gameplay;
 using RiverRush.Graphics;
 using RiverRush.Audio;
+using RiverRush.Diagnostics;
 using RiverRush.World;
 using UnityEditor;
 using UnityEngine;
@@ -31,13 +32,14 @@ namespace RiverRush.Editor
             var waterColors = Object.FindFirstObjectByType<RiverColorSystem>();
             var natureSound = Object.FindFirstObjectByType<RiverNatureAudio>();
             var race = Object.FindFirstObjectByType<RiverRaceManager>();
+            var benchmark = Object.FindFirstObjectByType<RiverPerformanceBenchmark>();
             var bots = Object.FindObjectsByType<RiverBotAI>(FindObjectsSortMode.None);
             int failures = 0;
             if (terrain == null || route == null || flow == null || water == null
                 || quality == null || runner == null || bootstrap == null || waves == null ||
                 oceanPhysics == null || race == null || bots.Length < 3 ||
                 waterColors == null || natureSound == null ||
-                tributaries == null || nature == null)
+                tributaries == null || nature == null || benchmark == null)
             {
                 Debug.LogError("Missing components. Use River Rush/Create Prototype Scene first.");
                 return;
